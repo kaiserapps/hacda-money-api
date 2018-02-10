@@ -1,0 +1,61 @@
+{
+    "name": "hacda-money-api",
+    "version": "1.0.0",
+    "description": "A money management API for the Harrisburg Area Contra Dance",
+    "main": "./dist/server.js",
+    "scripts": {
+        "start": "npm run build && nodemon ./dist/server.js",
+        "test": "karma start",
+        "build": "npm run clean && tsc",
+        "clean": "rimraf dist"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kaiserapps/hacda-money-api.git"
+    },
+    "author": "Evan Kaiser",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/kaiserapps/hacda-money-api/issues"
+    },
+    "homepage": "https://github.com/kaiserapps/hacda-money-api#readme",
+    "dependencies": {
+        "@sendgrid/mail": "^6.2.1",
+        "body-parser": "^1.18.2",
+        "cors": "^2.8.4",
+        "express": "^4.16.2",
+        "inversify": "^4.10.0",
+        "inversify-express-utils": "^5.2.1",
+        "moment": "^2.20.1",
+        "mongoose": "^5.0.4",
+        "passport": "^0.4.0",
+        "passport-facebook": "^2.1.1",
+        "passport-google-oauth2": "^0.1.6",
+        "passport-http": "^0.3.0",
+        "reflect-metadata": "^0.1.12",
+        "uuid": "^3.2.1"
+    },
+    "devDependencies": {
+        "@types/body-parser": "^1.16.8",
+        "@types/cors": "^2.8.3",
+        "@types/express": "^4.11.1",
+        "@types/jasmine": "^2.8.6",
+        "@types/node": "^9.4.5",
+        "@types/passport": "^0.4.2",
+        "@types/passport-facebook": "^2.1.7",
+        "@types/passport-google-oauth2": "^0.1.1",
+        "@types/uuid": "^3.4.3",
+        "jasmine-core": "^2.99.1",
+        "jasmine-spec-reporter": "^4.2.1",
+        "karma": "^2.0.0",
+        "karma-chrome-launcher": "^2.2.0",
+        "karma-cli": "^1.0.1",
+        "karma-jasmine": "^1.1.1",
+        "karma-remap-istanbul": "^0.6.0",
+        "karma-typescript": "^3.0.12",
+        "nodemon": "^1.14.12",
+        "rimraf": "^2.6.2",
+        "tslint": "^5.9.1",
+        "typescript": "^2.7.1"
+    }
+}
