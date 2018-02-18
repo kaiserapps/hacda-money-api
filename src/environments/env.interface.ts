@@ -9,6 +9,7 @@ export class IEnvironment {
     googleClientId?: string;
     googleClientSecret?: string;
     jwt?: {
+        cookieName?: string;
         tokenExpiration?: number;
         audiences?: string[];
         audience?: string;

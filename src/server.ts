@@ -47,6 +47,7 @@ const settings: IEnvironment = {
 };
 if (environment.jwt) {
     settings.jwt = {
+        cookieName: environment.jwt.cookieName || 'HACDA_jwt',
         tokenExpiration: environment.jwt.tokenExpiration || 60 * 60 * 24 * 365, // one year
         audiences: environment.jwt.audiences || [],
         audience: environment.jwt.audience || null,

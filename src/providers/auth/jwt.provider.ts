@@ -62,17 +62,20 @@ export abstract class JwtProvider implements IJwtProvider {
         });
     }
 
-    static getJwtProvider(strategy: AuthStrategy, environment: IEnvironment, userService: IUserService): IJwtProvider | null {
+    static getJwtProvider(strategy: AuthStrategy, environment: IEnvironment, userService: IUserService): Promise<IJwtProvider | null> {
+        let jwtProvider: IJwtProvider | null = null;
         switch (strategy) {
             case AuthStrategy.Basic:
-                return new BasicJwtProvider(userService, environment);
+                jwtProvider = new BasicJwtProvider(userService, environment);
+                break;
             case AuthStrategy.Facebook:
-                return new OAuthJwtProvider(userService, environment, environment.facebookClientId || '', environment.facebookClientSecret || '');
+                jwtProvider = new OAuthJwtProvider(userService, environment, environment.facebookClientId || '', environment.facebookClientSecret || '');
+                break;
             case AuthStrategy.Google:
-                return new OAuthJwtProvider(userService, environment, environment.googleClientId || '', environment.googleClientSecret || '');
-            default:
-                return null;
+                jwtProvider = new OAuthJwtProvider(userService, environment, environment.googleClientId || '', environment.googleClientSecret || '');
+                break;
         }
+        return Promise.resolve(jwtProvider);
     }
 
     static verifyToken(jwtSettings: any, token: string): Promise<any> {

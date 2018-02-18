@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { interfaces } from 'inversify-express-utils';
 
+import { User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { JwtProvider } from '../../providers/auth/jwt.provider';
@@ -26,6 +27,17 @@ export class AuthService implements IAuthService {
                 provider.validateToken(token).then(principal => {
                     this._user = principal;
                 });
+            }
+        });
+    }
+
+    public login(user: User): Promise<string> {
+        return JwtProvider.getJwtProvider(user.strategy, this.environment, this.userService).then(provider => {
+            if (provider) {
+                return provider.generateToken(user);
+            }
+            else {
+                return Promise.reject(`JWT Provider not found for strategy ${user.strategy}!`);
             }
         });
     }
