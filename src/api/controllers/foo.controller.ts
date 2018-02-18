@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { interfaces, controller, httpGet, httpPost, httpDelete, request, queryParam, response, requestParam, BaseHttpController } from 'inversify-express-utils';
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../../ioc-types';
+import { TYPES } from '../../ioc.types';
 
 @controller('/foo')
 export class FooController extends BaseHttpController implements interfaces.Controller {

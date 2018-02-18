@@ -1,6 +1,6 @@
-import { injectable } from "inversify";
-import { BaseMiddleware } from "inversify-express-utils";
 import * as express from 'express';
+import { injectable } from 'inversify';
+import { BaseMiddleware } from 'inversify-express-utils';
 
 @injectable()
 export class LoggingMiddleware extends BaseMiddleware {
