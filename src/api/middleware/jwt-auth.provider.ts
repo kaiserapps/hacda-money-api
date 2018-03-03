@@ -8,11 +8,19 @@ import { AuthService } from '../../service/auth/auth.service';
 const authService = inject(TYPES.AuthService);
 
 @injectable()
-export class CustomAuthProvider implements interfaces.AuthProvider {
+export class JwtAuthProvider implements interfaces.AuthProvider {
 
     @authService private readonly _authService: AuthService;
 
     getUser(req: express.Request, res: express.Response, next: express.NextFunction): Promise<interfaces.Principal> {
-        return Promise.resolve(this._authService.user);
+        const header = req.header('Authorization');
+        if (!!header && header.toLowerCase().startsWith('Bearer ')) {
+            return this._authService.checkToken(header.replace('Bearer ', '')).then(() => {
+                return this._authService.user;
+            });
+        }
+        else {
+            return Promise.reject(`Authorization header ${header} is not set or not a bearer token`);
+        }
     }
 }

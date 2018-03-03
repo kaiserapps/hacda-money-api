@@ -21,13 +21,17 @@ export class AuthService implements IAuthService {
         @inject(TYPES.UserService) public userService: IUserService
     ) { }
 
-    public checkToken(token: string): void {
-        JwtProvider.getJwtProviderByToken(token, this.environment, this.userService).then(provider => {
-            if (provider) {
-                provider.validateToken(token).then(principal => {
-                    this._user = principal;
-                });
+    public checkToken(token: string): Promise<void> {
+        if (!token) {
+            return Promise.reject(`Token is required.`);
+        }
+        return JwtProvider.getJwtProviderByToken(token, this.environment, this.userService).then(provider => {
+            if (!provider) {
+                return Promise.reject(`Provider for bearer token not found.`);
             }
+            return provider.validateToken(token).then(principal => {
+                this._user = principal;
+            });
         });
     }
 

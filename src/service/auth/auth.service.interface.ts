@@ -4,6 +4,6 @@ import { User } from '../../domain/user/user';
 
 export interface IAuthService {
     user: interfaces.Principal;
-    checkToken(token: string): void;
+    checkToken(token: string): Promise<void>;
     login(user: User): Promise<string>;
 }

@@ -14,11 +14,10 @@ export class UserMongoRepository implements IUserRepository {
         this.UserModel = mongoose.model('User');
     }
 
-    getUserByStrategyAndUsername(strategy: AuthStrategy, username: string): Promise<User> {
+    getUser(email: string): Promise<User> {
         return new Promise<User>((resolve: any, reject: any) => {
             this.UserModel.find({
-                strategy: strategy,
-                username: username
+                email: email
             }, (err: any, users: any) => {
                 if (err) {
                     reject(err);
@@ -30,15 +29,28 @@ export class UserMongoRepository implements IUserRepository {
         });
     }
 
-    createUser(user: User): Promise<User> {
-        return new Promise<any>((resolve: any, reject: any) => {
+    createUser(user: User): Promise<void> {
+        return new Promise<void>((resolve: any, reject: any) => {
             const newUser = new this.UserModel(user);
-            newUser.save((err: any, userOut: any) => {
+            newUser.save((err: any) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    resolve(userOut);
+                    resolve();
+                }
+            });
+        });
+    }
+
+    saveUser(user: User): Promise<void> {
+        return new Promise<void>((resolve: any, reject: any) => {
+            this.UserModel.findByIdAndUpdate(user._id, user, (err: any) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve();
                 }
             });
         });
@@ -54,10 +66,6 @@ export const UserSchema = {
             AuthStrategy.Facebook,
             AuthStrategy.Google
         ]
-    },
-    username: {
-        type: String,
-        required: 'Username is required.'
     },
     email: {
         type: String,

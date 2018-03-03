@@ -6,6 +6,8 @@ export const TYPES = {
     LoggingMiddleware: Symbol('LoggingMiddleware'),
     // providers
     CryptoProvider: Symbol('CryptoProvider'),
+    DateProvider: Symbol('DateProvider'),
+    EmailProvider: Symbol('EmailProvider'),
     // repositories
     UserRepository: Symbol('UserRepository'),
     // services

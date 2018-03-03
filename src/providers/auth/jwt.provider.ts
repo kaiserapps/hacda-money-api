@@ -43,14 +43,15 @@ export abstract class JwtProvider implements IJwtProvider {
                 expiresIn: this.jwt.tokenExpiration,
                 audience: this.jwt.audiences,
                 issuer: this.jwt.issuer,
-                subject: user.username,
+                subject: user.email,
             }, (err, token) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    this.userService.addSession(user.username, token);
-                    resolve(token);
+                    this.userService.addSession(user.email, token).then(() => {
+                        resolve(token);
+                    });
                 }
             });
         });

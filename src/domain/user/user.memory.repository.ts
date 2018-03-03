@@ -13,19 +13,28 @@ export class UserMemoryRepository implements IUserRepository {
         @inject(TYPES.InMemoryDb) private database: InMemoryDb
     ) { }
 
-    getUserByStrategyAndUsername(strategy: AuthStrategy, username: string): Promise<User> {
-        const user = this.database.users.find(x => x.strategy === strategy && x.username === username);
+    getUser(email: string): Promise<User> {
+        const user = this.database.users.find(x => x.email === email);
         if (user) {
             return Promise.resolve(user);
         }
         else {
-            return Promise.reject(`User ${username} not found!`);
+            return Promise.reject(`User with email address ${email} not found!`);
         }
     }
 
-    createUser(user: User): Promise<User> {
+    createUser(user: User): Promise<void> {
         user._id = uuid4();
         this.database.users.push(user);
-        return Promise.resolve(user);
+        return Promise.resolve();
+    }
+
+    saveUser(user: User): Promise<void> {
+        const idx = this.database.users.findIndex(x => x._id === user._id);
+        if (idx < 0) {
+            return Promise.reject(`User with email address ${user.email} not found!`);
+        }
+        this.database.users[idx] = user;
+        return Promise.resolve();
     }
 }

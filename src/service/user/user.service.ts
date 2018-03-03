@@ -2,26 +2,75 @@ import { inject, injectable } from 'inversify';
 
 import { User } from '../../domain/user/user';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
+import { IEnvironment } from '../../environments/env.interface';
+import { ONE_DAY_IN_SECONDS } from '../../global-const';
 import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
+import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
+import { IDateProvider } from '../../providers/date/date.provider.interface';
+import { IEmailProvider } from '../../providers/email/email.provider.interface';
 import { IUserService } from './user.service.interface';
+import { Password } from '../../domain/user/password';
 
 @injectable()
 export class UserService implements IUserService {
 
     constructor(
-        @inject(TYPES.UserRepository) private userRepository: IUserRepository
+        @inject(TYPES.Environment) public environment: IEnvironment,
+        @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+        @inject(TYPES.CryptoProvider) private cryptoProvider: ICryptoProvider,
+        @inject(TYPES.DateProvider) private dateProvider: IDateProvider,
+        @inject(TYPES.EmailProvider) private emailProvider: IEmailProvider,
     ) { }
 
-    registerUser(strategy: AuthStrategy, username: string, password?: string): Promise<User> {
-        throw new Error('Method not implemented.');
+    registerUser(strategy: AuthStrategy, email: string, familyName: string, givenName: string, oAuthData?: any): Promise<User> {
+        return User.register(this.userRepository, strategy, email, familyName, givenName, oAuthData).then(user => {
+            return this.userRepository.createUser(user).then(() => {
+                if (strategy === AuthStrategy.Basic) {
+                    const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
+                    return this.setPasswordResetTokenAndSendEmail(user, resetToken, true).then(() => user);
+                }
+                return user;
+            });
+        });
     }
 
-    addSession(username: string, token: string): void {
-        throw new Error('Method not implemented.');
+    addSession(email: string, token: string): Promise<void> {
+        return this.userRepository.getUser(email).then(user => {
+            user.tokens.push(token);
+            return this.userRepository.saveUser(user);
+        });
     }
 
-    findUser(strategy: AuthStrategy, username: string): Promise<User> {
-        return this.userRepository.getUserByStrategyAndUsername(strategy, username);
+    findUser(email: string): Promise<User> {
+        return this.userRepository.getUser(email);
+    }
+
+    forgotPass(email: string): Promise<void> {
+        return this.userRepository.getUser(email).then(user => {
+            const expiration = this.environment.resetPassTokenExpiration || ONE_DAY_IN_SECONDS;
+            const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
+            return this.setPasswordResetTokenAndSendEmail(user, resetToken);
+        });
+    }
+
+    resetPass(email: string, token: string, password: string): Promise<void> {
+        return this.userRepository.getUser(email).then(user => {
+            return user.resetPassword(this.dateProvider, token, Password.create(this.cryptoProvider, password));
+        });
+    }
+
+    private setPasswordResetTokenAndSendEmail(user: User, resetToken: string, isActivation?: boolean): Promise<any> {
+        const action = isActivation ? 'activate your account' : 'reset your password';
+        const title = isActivation ? 'Active Account' : 'Reset Password';
+        return this.emailProvider.sendEmail(
+            user.email,
+            title,
+            `Please click the following link to ${action}.<br />
+            <a href="${this.environment.url}/auth/basic/reset/${resetToken}">${title}</a>`,
+            'accountManagement',
+            {
+                'ClientUrl': this.environment.clientUrl
+            });
     }
 }

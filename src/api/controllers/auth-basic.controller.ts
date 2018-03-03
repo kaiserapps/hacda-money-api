@@ -1,7 +1,16 @@
 import * as express from 'express';
 import { inject } from 'inversify';
-import { BaseHttpController, controller, httpPost, interfaces, request, response } from 'inversify-express-utils';
+import {
+    BaseHttpController,
+    controller,
+    httpPost,
+    interfaces,
+    request,
+    requestParam,
+    response,
+} from 'inversify-express-utils';
 
+import { User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { IAuthService } from '../../service/auth/auth.service.interface';
@@ -21,7 +30,7 @@ export class AuthBasicController extends BaseHttpController implements interface
 
     @httpPost('/login', TYPES.LoggingMiddleware)
     public login(@request() req: express.Request, @response() res: express.Response) {
-        this.userService.findUser(req.body.strategy, req.body.username).then(user => {
+        this.userService.findUser(req.body.email).then(user => {
             if (user.password.verify(req.body.password)) {
                 this.authService.login(user).then(token => {
                     res.cookie(this.jwt.cookieName, token, {
@@ -36,14 +45,17 @@ export class AuthBasicController extends BaseHttpController implements interface
     }
 
     @httpPost('/register', TYPES.LoggingMiddleware)
-    public register(@request() req: express.Request, @response() res: express.Response): any {
+    public register(@request() req: express.Request, @response() res: express.Response): Promise<User> {
+        return this.userService.registerUser(req.body.strategy, req.body.email, req.body.familyName, req.body.givenName, req.body.oAuthData);
     }
 
     @httpPost('/forgotpass', TYPES.LoggingMiddleware)
     public forgotpass(@request() req: express.Request, @response() res: express.Response): any {
+        return this.userService.forgotPass(req.body.email);
     }
 
-    @httpPost('/resetpass', TYPES.LoggingMiddleware)
-    public resetpass(@request() req: express.Request, @response() res: express.Response): any {
+    @httpPost('/resetpass/:token', TYPES.LoggingMiddleware)
+    public resetpass(@requestParam('token') token: string, @request() req: express.Request, @response() res: express.Response): any {
+        return this.userService.resetPass(req.body.email, token, req.body.password);
     }
 }

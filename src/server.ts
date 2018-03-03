@@ -6,16 +6,22 @@ import { Container } from 'inversify';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import * as mongoose from 'mongoose';
 
-import { CustomAuthProvider } from './api/middleware/custom-auth.provider';
+import { JwtAuthProvider } from './api/middleware/jwt-auth.provider';
 import { LoggingMiddleware } from './api/middleware/logging.middleware';
 import { InMemoryDb } from './domain/in-memory.db';
 import { UserMemoryRepository } from './domain/user/user.memory.repository';
 import { UserMongoRepository, UserSchema } from './domain/user/user.mongo.repository';
 import { IUserRepository } from './domain/user/user.repository.interface';
 import { IEnvironment } from './environments/env.interface';
+import * as CONSTS from './global-const';
 import { TYPES } from './ioc.types';
 import { CryptoProvider } from './providers/crypto/crypto.provider';
 import { ICryptoProvider } from './providers/crypto/crypto.provider.interface';
+import { IDateProvider } from './providers/date/date.provider.interface';
+import { MomentDateProvider } from './providers/date/moment-date.provider';
+import { IEmailProvider } from './providers/email/email.provider.interface';
+import { LocalEmailProvider } from './providers/email/local-email.provider';
+import { SendGridEmailProvider } from './providers/email/sendgrid-email.provider';
 import { AuthService } from './service/auth/auth.service';
 import { IAuthService } from './service/auth/auth.service.interface';
 import { UserService } from './service/user/user.service';
@@ -32,7 +38,7 @@ const mergeEnvironments = (mainEnv: any, updatedEnv: any): any => {
 
 // Pull in environment variables
 const env = (process.env.NODE_ENVIRONMENT || 'development').toLowerCase();
-let environment = require(`./environments/env.js`).environment || {};
+let environment = require(`./environments/env.js`).environment as IEnvironment || {};
 environment = mergeEnvironments(environment, (require(`./environments/env.${env}.js`).environment || {}));
 const settings: IEnvironment = {
     environment: env,
@@ -43,15 +49,19 @@ const settings: IEnvironment = {
     facebookClientId: environment.facebookClientId || process.env.FACEBOOK_CLIENT_ID || '',
     facebookClientSecret: environment.facebookClientSecret || process.env.FACEBOOK_CLIENT_SECRET || '',
     googleClientId: environment.googleClientId || process.env.GOOGLE_CLIENT_ID || '',
-    googleClientSecret: environment.googleClientSecret || process.env.GOOGLE_CLIENT_SECRET || ''
+    googleClientSecret: environment.googleClientSecret || process.env.GOOGLE_CLIENT_SECRET || '',
+    resetPassTokenExpiration: environment.resetPassTokenExpiration || CONSTS.ONE_DAY_IN_SECONDS,
+    useLocalEmail: environment.useLocalEmail || false,
+    emailFrom: environment.emailFrom || 'noreply',
+    sendGridApiKey: environment.sendGridApiKey || process.env.SEND_GRID_API_KEY
 };
 if (environment.jwt) {
     settings.jwt = {
         cookieName: environment.jwt.cookieName || 'HACDA_jwt',
-        tokenExpiration: environment.jwt.tokenExpiration || 60 * 60 * 24 * 365, // one year
+        tokenExpiration: environment.jwt.tokenExpiration || CONSTS.ONE_YEAR_IN_SECONDS,
         audiences: environment.jwt.audiences || [],
-        audience: environment.jwt.audience || null,
-        issuer: environment.jwt.issuer || null,
+        audience: environment.jwt.audience,
+        issuer: environment.jwt.issuer,
         privateKeyPath: environment.jwt.privateKeyPath,
         publicKeyPath: environment.jwt.publicKeyPath
     };
@@ -71,6 +81,13 @@ if (settings.useInMemoryDb) {
 container.bind<LoggingMiddleware>(TYPES.LoggingMiddleware).to(LoggingMiddleware).inRequestScope();
 // providers
 container.bind<ICryptoProvider>(TYPES.CryptoProvider).to(CryptoProvider).inSingletonScope();
+container.bind<IDateProvider>(TYPES.DateProvider).to(MomentDateProvider).inSingletonScope();
+if (settings.useLocalEmail) {
+    container.bind<IEmailProvider>(TYPES.EmailProvider).to(LocalEmailProvider).inSingletonScope();
+}
+else {
+    container.bind<IEmailProvider>(TYPES.EmailProvider).to(SendGridEmailProvider).inSingletonScope();
+}
 // repositories
 if (settings.useInMemoryDb) {
     container.bind<IUserRepository>(TYPES.UserRepository).to(UserMemoryRepository).inRequestScope();
@@ -87,7 +104,7 @@ mongoose.model('User', new mongoose.Schema(UserSchema));
 
 // create server
 const server = new InversifyExpressServer(
-    container, null, null, null, CustomAuthProvider
+    container, null, null, null, JwtAuthProvider
 );
 server.setConfig(a => {
     // add body parser
@@ -101,6 +118,9 @@ const app = server.build();
 // initialize mongoose and then run server
 (mongoose as any).Promise = global.Promise;
 const mongooseConnect = () => {
+    if (!environment.connectionString) {
+        throw new Error(`Connection string must be defined in one of the environment files.`);
+    }
     mongoose.connect(environment.connectionString, {
         useMongoClient: true
     }).then(() => {
