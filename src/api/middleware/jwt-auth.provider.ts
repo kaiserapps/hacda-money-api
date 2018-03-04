@@ -3,6 +3,7 @@ import { inject, injectable } from 'inversify';
 import { interfaces } from 'inversify-express-utils';
 
 import { TYPES } from '../../ioc.types';
+import { UnauthenticatedPrincipal } from '../../providers/auth/unauthenticated-principal';
 import { AuthService } from '../../service/auth/auth.service';
 
 const authService = inject(TYPES.AuthService);
@@ -20,7 +21,7 @@ export class JwtAuthProvider implements interfaces.AuthProvider {
             });
         }
         else {
-            return Promise.reject(`Authorization header ${header} is not set or not a bearer token`);
+            return Promise.resolve(new UnauthenticatedPrincipal());
         }
     }
 }

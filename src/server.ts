@@ -72,12 +72,12 @@ const container = new Container();
 
 // set up bindings
 // consts/static
-container.bind<any>(TYPES.Environment).toConstantValue(settings);
+container.bind<IEnvironment>(TYPES.Environment).toConstantValue(settings);
 if (settings.useInMemoryDb) {
     container.bind<InMemoryDb>(TYPES.InMemoryDb).toConstantValue(new InMemoryDb());
 }
 // middleware
-container.bind<LoggingMiddleware>(TYPES.LoggingMiddleware).to(LoggingMiddleware).inRequestScope();
+container.bind<LoggingMiddleware>(TYPES.LoggingMiddleware).to(LoggingMiddleware).inSingletonScope();
 // providers
 container.bind<ICryptoProvider>(TYPES.CryptoProvider).to(CryptoProvider).inSingletonScope();
 container.bind<IDateProvider>(TYPES.DateProvider).to(MomentDateProvider).inSingletonScope();

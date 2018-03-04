@@ -8,7 +8,7 @@ export class UnauthenticatedPrincipal implements interfaces.Principal {
     }
 
     constructor(
-        details: any
+        details?: any
     ) {
         this._details = details;
     }
