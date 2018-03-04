@@ -1,5 +1,4 @@
-import './api/controllers/foo.controller';
-import './polyfills';
+import './api/controllers/_import-controllers';
 
 import * as bodyParser from 'body-parser';
 import { Container } from 'inversify';
@@ -121,9 +120,7 @@ const mongooseConnect = () => {
     if (!environment.connectionString) {
         throw new Error(`Connection string must be defined in one of the environment files.`);
     }
-    mongoose.connect(environment.connectionString, {
-        useMongoClient: true
-    }).then(() => {
+    mongoose.connect(environment.connectionString).then(() => {
         try {
             app.listen(settings.port);
         }

@@ -1,7 +1,9 @@
 import * as fs from 'fs';
+import { injectable } from 'inversify';
 
 import { IEmailProvider } from './email.provider.interface';
 
+@injectable()
 export class LocalEmailProvider implements IEmailProvider {
     sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<any> {
         const msg = {
