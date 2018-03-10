@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 
+import { Password } from '../../domain/user/password';
 import { User } from '../../domain/user/user';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
@@ -8,9 +9,9 @@ import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { IEmailProvider } from '../../providers/email/email.provider.interface';
+import { IEmailProvider, IEmail } from '../../providers/email/email.provider.interface';
+import { UserResponse } from './user-response';
 import { IUserService } from './user.service.interface';
-import { Password } from '../../domain/user/password';
 
 @injectable()
 export class UserService implements IUserService {
@@ -23,14 +24,17 @@ export class UserService implements IUserService {
         @inject(TYPES.EmailProvider) private emailProvider: IEmailProvider,
     ) { }
 
-    registerUser(strategy: AuthStrategy, email: string, familyName: string, givenName: string, oAuthData?: any): Promise<User> {
+    registerUser(strategy: AuthStrategy, email: string, familyName: string, givenName: string, oAuthData?: any): Promise<UserResponse> {
         return User.register(this.userRepository, strategy, email, familyName, givenName, oAuthData).then(user => {
             return this.userRepository.createUser(user).then(() => {
                 if (strategy === AuthStrategy.Basic) {
                     const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
-                    return this.setPasswordResetTokenAndSendEmail(user, resetToken, true).then(() => user);
+                    return this.setPasswordResetTokenAndSendEmail(user, resetToken, true)
+                        .then(() => new UserResponse(user));
                 }
-                return user;
+                else {
+                    return new UserResponse(user);
+                }
             });
         });
     }
@@ -38,6 +42,9 @@ export class UserService implements IUserService {
     addSession(email: string, token: string): Promise<void> {
         return this.userRepository.getUser(email).then(user => {
             if (user) {
+                if (!user.tokens) {
+                    user.tokens = [];
+                }
                 user.tokens.push(token);
                 return this.userRepository.saveUser(user);
             }
@@ -51,12 +58,12 @@ export class UserService implements IUserService {
         return this.userRepository.getUser(email);
     }
 
-    forgotPass(email: string): Promise<void> {
+    forgotPass(email: string): Promise<string> {
         return this.userRepository.getUser(email).then(user => {
             if (user) {
                 const expiration = this.environment.resetPassTokenExpiration || ONE_DAY_IN_SECONDS;
                 const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
-                return this.setPasswordResetTokenAndSendEmail(user, resetToken);
+                return this.setPasswordResetTokenAndSendEmail(user, resetToken).then(() => resetToken);
             }
             else {
                 return Promise.reject(`User ${email} not found.`);
@@ -75,14 +82,14 @@ export class UserService implements IUserService {
         });
     }
 
-    private setPasswordResetTokenAndSendEmail(user: User, resetToken: string, isActivation?: boolean): Promise<any> {
+    private setPasswordResetTokenAndSendEmail(user: User, resetToken: string, isActivation?: boolean): Promise<IEmail> {
         const action = isActivation ? 'activate your account' : 'reset your password';
         const title = isActivation ? 'Active Account' : 'Reset Password';
         return this.emailProvider.sendEmail(
             user.email,
             title,
             `Please click the following link to ${action}.<br />
-            <a href="${this.environment.url}/auth/basic/reset/${resetToken}">${title}</a>`,
+            <a href="${this.environment.url}/auth/basic/resetpass/${resetToken}">${title}</a>`,
             'accountManagement',
             {
                 'ClientUrl': this.environment.clientUrl

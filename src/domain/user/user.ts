@@ -40,6 +40,10 @@ export class User {
         return this._familyName;
     }
 
+    get resetToken(): string {
+        return this._resetToken;
+    }
+
     get password(): Password {
         return this._password;
     }

@@ -36,11 +36,12 @@ export abstract class JwtProvider implements IJwtProvider {
             profile: (user.oAuthData || {}).profile_url
         };
         return new Promise<string>((resolve, reject) => {
+            const that = this;
             jwt.sign(data, cert, {
                 algorithm: 'RS256',
-                expiresIn: this.jwt.tokenExpiration,
-                audience: this.jwt.audiences,
-                issuer: this.jwt.issuer,
+                expiresIn: that.jwt.tokenExpiration,
+                audience: that.jwt.audiences,
+                issuer: that.jwt.issuer,
                 subject: user.email,
             }, (err, token) => {
                 if (err) {

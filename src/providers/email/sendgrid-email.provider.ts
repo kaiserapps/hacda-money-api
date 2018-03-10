@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
-import { IEmailProvider } from './email.provider.interface';
+import { IEmail, IEmailProvider } from './email.provider.interface';
 
 @injectable()
 export class SendGridEmailProvider implements IEmailProvider {
@@ -12,7 +12,7 @@ export class SendGridEmailProvider implements IEmailProvider {
     ) {
     }
 
-    public sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<any> {
+    public sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<IEmail> {
         if (!substitutions) {
             substitutions = {};
         }
@@ -28,7 +28,8 @@ export class SendGridEmailProvider implements IEmailProvider {
             templateId: sendGridTemplates[templateId],
             substitutions: substitutions
         };
-        console.log(msg);
-        return SendGrid.send(msg);
+        return SendGrid.send(msg).then(() => {
+            return {...msg, body};
+        });
     }
 }

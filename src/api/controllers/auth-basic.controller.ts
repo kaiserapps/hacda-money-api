@@ -1,3 +1,4 @@
+import * as auth from 'basic-auth';
 import * as express from 'express';
 import { inject } from 'inversify';
 import {
@@ -8,14 +9,14 @@ import {
     request,
     requestParam,
     response,
+    httpGet,
 } from 'inversify-express-utils';
 
-import { User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { IAuthService } from '../../service/auth/auth.service.interface';
+import { UserResponse } from '../../service/user/user-response';
 import { IUserService } from '../../service/user/user.service.interface';
-import * as auth from 'basic-auth';
 
 @controller('/auth/basic')
 export class AuthBasicController extends BaseHttpController implements interfaces.Controller {
@@ -29,7 +30,7 @@ export class AuthBasicController extends BaseHttpController implements interface
         this.jwt = environment.jwt || {};
     }
 
-    @httpPost('/login')
+    @httpGet('/login')
     public login(@request() req: express.Request, @response() res: express.Response) {
         const credentials = auth(req);
         if (credentials) {
@@ -52,7 +53,7 @@ export class AuthBasicController extends BaseHttpController implements interface
     }
 
     @httpPost('/register')
-    public register(@request() req: express.Request, @response() res: express.Response): Promise<User> {
+    public register(@request() req: express.Request, @response() res: express.Response): Promise<UserResponse> {
         return this.userService.registerUser(req.body.strategy, req.body.email, req.body.familyName, req.body.givenName, req.body.oAuthData);
     }
 

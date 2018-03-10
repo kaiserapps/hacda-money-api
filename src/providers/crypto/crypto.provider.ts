@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
-import { ICryptoProvider } from './crypto.provider.interface';
+import { ICryptoProvider, IPassword } from './crypto.provider.interface';
 
 @injectable()
 export class CryptoProvider implements ICryptoProvider {
@@ -11,18 +11,20 @@ export class CryptoProvider implements ICryptoProvider {
         @inject(TYPES.Environment) public environment: IEnvironment
     ) { }
 
-    public hashPassword(password: string, algorithm: string = 'sha512'): [string, string] {
+    public hashPassword(password: string, algorithm: string = 'sha512'): IPassword {
         const salt = this.genRandomString(8);
         const hash = crypto.createHmac(algorithm, salt);
         hash.update(password);
-        const passwordHash = hash.digest('hex');
-        return [salt, passwordHash];
+        return {
+            salt: salt,
+            hash: hash.digest('hex')
+        };
     }
 
-    public verifyPassword(password: string, passwordHash: string, salt: string, algorithm: string = 'sha512'): boolean {
-        const hash = crypto.createHmac(algorithm, salt);
+    public verifyPassword(password: string, hashInfo: IPassword, algorithm: string = 'sha512'): boolean {
+        const hash = crypto.createHmac(algorithm, hashInfo.salt);
         hash.update(password);
-        return hash.digest('hex') === passwordHash;
+        return hash.digest('hex') === hashInfo.hash;
     }
 
     public encrypt(plaintext: string, algorithm: string = 'des3'): string {

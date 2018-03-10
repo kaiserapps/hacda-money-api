@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
-import { IEmailProvider } from './email.provider.interface';
+import { IEmail, IEmailProvider } from './email.provider.interface';
 
 @injectable()
 export class LocalEmailProvider implements IEmailProvider {
@@ -13,16 +13,17 @@ export class LocalEmailProvider implements IEmailProvider {
     ) {
     }
 
-    sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<any> {
+    sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<IEmail> {
         const msg = {
             to: email,
+            from: '',
             subject: subject,
             body: body,
             templateId: templateId,
             substitutions: substitutions
         };
 
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<IEmail>((resolve, reject) => {
             const emailPath = path.join(this.environment.localEmailPath || '', `email_${new Date().getTime()}.txt`);
             fs.writeFile(emailPath, JSON.stringify(msg), null, err => {
                 if (err) {

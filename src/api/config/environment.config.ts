@@ -48,7 +48,12 @@ export class EnvironmentConfig {
     private static mergeEnvironments = (mainEnv: any, updatedEnv: any): any => {
         for (const e in updatedEnv) {
             if (updatedEnv.hasOwnProperty(e)) {
-                mainEnv[e] = updatedEnv[e];
+                if (!mainEnv[e] || typeof updatedEnv[e] !== 'object') {
+                    mainEnv[e] = updatedEnv[e];
+                }
+                else {
+                    mainEnv[e] = EnvironmentConfig.mergeEnvironments(mainEnv[e], updatedEnv[e]);
+                }
             }
         }
         return mainEnv;
