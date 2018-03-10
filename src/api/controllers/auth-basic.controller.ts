@@ -3,7 +3,6 @@ import { inject } from 'inversify';
 import {
     BaseHttpController,
     controller,
-    httpGet,
     httpPost,
     interfaces,
     request,
@@ -16,6 +15,7 @@ import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { IUserService } from '../../service/user/user.service.interface';
+import * as auth from 'basic-auth';
 
 @controller('/auth/basic')
 export class AuthBasicController extends BaseHttpController implements interfaces.Controller {
@@ -31,18 +31,24 @@ export class AuthBasicController extends BaseHttpController implements interface
 
     @httpPost('/login')
     public login(@request() req: express.Request, @response() res: express.Response) {
-        this.userService.findUser(req.body.email).then(user => {
-            if (user.password.verify(req.body.password)) {
-                this.authService.login(user).then(token => {
-                    res.cookie(this.jwt.cookieName, token, {
-                        maxAge: this.jwt.tokenExpiration * 1000
-                    });
-                });
-            }
-            else {
-                res.sendStatus(401);
-            }
-        });
+        const credentials = auth(req);
+        if (credentials) {
+            this.userService.findUser(credentials.name).then(user => {
+                if (user && user.password.verify(credentials.pass)) {
+                    this.authService.login(user).then(token => {
+                        res.cookie(this.jwt.cookieName, token, {
+                            maxAge: this.jwt.tokenExpiration * 1000
+                        });
+                    }).catch(() => this.sendBasicAuthChallenge(res));
+                }
+                else {
+                    this.sendBasicAuthChallenge(res);
+                }
+            }).catch(() => this.sendBasicAuthChallenge(res));
+        }
+        else {
+            this.sendBasicAuthChallenge(res);
+        }
     }
 
     @httpPost('/register')
@@ -58,5 +64,10 @@ export class AuthBasicController extends BaseHttpController implements interface
     @httpPost('/resetpass/:token')
     public resetpass(@requestParam('token') token: string, @request() req: express.Request, @response() res: express.Response): any {
         return this.userService.resetPass(req.body.email, token, req.body.password);
+    }
+
+    private sendBasicAuthChallenge(res: express.Response) {
+        res.setHeader('WWW-Authenticate', 'Basic');
+        res.sendStatus(401);
     }
 }

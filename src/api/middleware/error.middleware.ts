@@ -2,8 +2,11 @@ import * as express from 'express';
 import * as chalk from 'chalk';
 
 export class ErrorMiddleware {
-    static handler(err: any, req: express.Request, res: express.Response, next: express.NextFunction) {
-        console.error(chalk.default.red(`Unexpected error: err`));
-        res.status(500).json({error: err});
+    static handler(err: Error | string, req: express.Request, res: express.Response, next: express.NextFunction) {
+        if (typeof err === 'string') {
+            err = new Error(err);
+        }
+        console.error(chalk.default.red(`Unexpected error: ${err.message}`));
+        res.status(500).json({ error: err.message });
     }
 }

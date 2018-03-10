@@ -57,7 +57,7 @@ export class User {
         oAuthData?: any
     ): Promise<User> {
         return userRepository.getUser(email).then(existingUser => {
-            if (!existingUser) {
+            if (!!existingUser) {
                 throw new Error(`User with email ${email} already exists.`);
             }
             else {

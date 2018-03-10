@@ -4,7 +4,7 @@ import { AuthStrategy } from '../../providers/auth/enums';
 export interface IUserService {
     registerUser(strategy: AuthStrategy, email: string, familyName: string, givenName: string, oAuthData?: any): Promise<User>;
     addSession(email: string, token: string): Promise<void>;
-    findUser(email: string): Promise<User>;
+    findUser(email: string): Promise<User | null>;
     forgotPass(email: string): Promise<void>;
     resetPass(email: string, token: string, password: string): Promise<void>;
 }

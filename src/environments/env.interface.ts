@@ -12,6 +12,7 @@ export class IEnvironment {
     googleClientSecret?: string;
     resetPassTokenExpiration?: number;
     useLocalEmail?: boolean;
+    localEmailPath?: string;
     emailFrom?: string;
     sendGridApiKey?: string;
     sendGridTemplates?: { [key: string]: string };

@@ -15,6 +15,8 @@ export class EnvironmentConfig {
         const settings: IEnvironment = {
             environment: envName,
             port: environment.port || 3000,
+            url: environment.url,
+            clientUrl: environment.clientUrl,
             useInMemoryDb: environment.useInMemoryDb || false,
             connectionString: environment.connectionString,
             encryptionKey: environment.encryptionKey || env.ENCRYPTION_KEY,
@@ -24,8 +26,10 @@ export class EnvironmentConfig {
             googleClientSecret: environment.googleClientSecret || env.GOOGLE_CLIENT_SECRET || '',
             resetPassTokenExpiration: environment.resetPassTokenExpiration || CONSTS.ONE_DAY_IN_SECONDS,
             useLocalEmail: environment.useLocalEmail || false,
+            localEmailPath: environment.localEmailPath || '',
             emailFrom: environment.emailFrom || 'noreply',
-            sendGridApiKey: environment.sendGridApiKey || env.SEND_GRID_API_KEY
+            sendGridApiKey: environment.sendGridApiKey || env.SEND_GRID_API_KEY,
+            sendGridTemplates: environment.sendGridTemplates || {}
         };
         if (environment.jwt) {
             settings.jwt = {

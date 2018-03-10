@@ -1,4 +1,6 @@
+import * as fs from 'fs';
 import { Container } from 'inversify';
+import * as path from 'path';
 
 import { InMemoryDb } from '../../domain/in-memory.db';
 import { UserMemoryRepository } from '../../domain/user/user.memory.repository';
@@ -19,7 +21,7 @@ import { UserService } from '../../service/user/user.service';
 import { IUserService } from '../../service/user/user.service.interface';
 
 export class ContainerConfig {
-    static Configure(settings: IEnvironment) {
+    static Configure(settings: IEnvironment, rootDir: string) {
         // set up container
         const container = new Container();
 
@@ -34,6 +36,10 @@ export class ContainerConfig {
         container.bind<ICryptoProvider>(TYPES.CryptoProvider).to(CryptoProvider).inSingletonScope();
         container.bind<IDateProvider>(TYPES.DateProvider).to(MomentDateProvider).inSingletonScope();
         if (settings.useLocalEmail) {
+            settings.localEmailPath = path.join(rootDir, settings.localEmailPath || '');
+            if (!fs.existsSync(settings.localEmailPath)) {
+                fs.mkdirSync(settings.localEmailPath);
+            }
             container.bind<IEmailProvider>(TYPES.EmailProvider).to(LocalEmailProvider).inSingletonScope();
         }
         else {

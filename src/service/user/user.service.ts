@@ -37,26 +37,41 @@ export class UserService implements IUserService {
 
     addSession(email: string, token: string): Promise<void> {
         return this.userRepository.getUser(email).then(user => {
-            user.tokens.push(token);
-            return this.userRepository.saveUser(user);
+            if (user) {
+                user.tokens.push(token);
+                return this.userRepository.saveUser(user);
+            }
+            else {
+                return Promise.reject(`User ${email} not found.`);
+            }
         });
     }
 
-    findUser(email: string): Promise<User> {
+    findUser(email: string): Promise<User | null> {
         return this.userRepository.getUser(email);
     }
 
     forgotPass(email: string): Promise<void> {
         return this.userRepository.getUser(email).then(user => {
-            const expiration = this.environment.resetPassTokenExpiration || ONE_DAY_IN_SECONDS;
-            const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
-            return this.setPasswordResetTokenAndSendEmail(user, resetToken);
+            if (user) {
+                const expiration = this.environment.resetPassTokenExpiration || ONE_DAY_IN_SECONDS;
+                const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
+                return this.setPasswordResetTokenAndSendEmail(user, resetToken);
+            }
+            else {
+                return Promise.reject(`User ${email} not found.`);
+            }
         });
     }
 
     resetPass(email: string, token: string, password: string): Promise<void> {
         return this.userRepository.getUser(email).then(user => {
-            return user.resetPassword(this.dateProvider, token, Password.create(this.cryptoProvider, password));
+            if (user) {
+                return user.resetPassword(this.dateProvider, token, Password.create(this.cryptoProvider, password));
+            }
+            else {
+                return Promise.reject(`User ${email} not found.`);
+            }
         });
     }
 

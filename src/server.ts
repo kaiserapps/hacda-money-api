@@ -11,7 +11,7 @@ import { MongooseConfig } from './api/config/mongoose.config';
 
 // Configure API
 const settings = EnvironmentConfig.Configure(process.env, path.join(__dirname, 'environments'));
-const container = ContainerConfig.Configure(settings);
+const container = ContainerConfig.Configure(settings, __dirname);
 MongooseConfig.SetupSchemas();
 
 // create Express server

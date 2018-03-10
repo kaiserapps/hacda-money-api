@@ -14,9 +14,9 @@ export class JwtAuthProvider implements interfaces.AuthProvider {
     @authService private readonly _authService: AuthService;
 
     getUser(req: express.Request, res: express.Response, next: express.NextFunction): Promise<interfaces.Principal> {
-        const header = req.header('Authorization');
-        if (!!header && header.toLowerCase().startsWith('Bearer ')) {
-            return this._authService.checkToken(header.replace('Bearer ', '')).then(() => {
+        const authHeader = req.header('Authorization');
+        if (!!authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
+            return this._authService.checkToken(authHeader.split(' ')[1]).then(() => {
                 return this._authService.user;
             });
         }

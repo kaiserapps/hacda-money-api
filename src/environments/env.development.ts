@@ -5,6 +5,7 @@ export const environment: IEnvironment = {
     clientUrl: 'http://localhost:4200',
     useInMemoryDb: true,
     useLocalEmail: true,
+    localEmailPath: 'test-email',
     sendGridTemplates: {
         accountManagement: '062dc554-7864-43f6-aeee-a3b0d319bd6e'
     },
