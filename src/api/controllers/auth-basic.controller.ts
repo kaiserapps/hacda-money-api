@@ -3,6 +3,7 @@ import { inject } from 'inversify';
 import {
     BaseHttpController,
     controller,
+    httpGet,
     httpPost,
     interfaces,
     request,
@@ -28,7 +29,17 @@ export class AuthBasicController extends BaseHttpController implements interface
         this.jwt = environment.jwt || {};
     }
 
-    @httpPost('/login', TYPES.LoggingMiddleware)
+    @httpGet('/test/:id')
+    public test(@requestParam('id') id: string) {
+        if (id === 'err') {
+            return Promise.reject(id);
+        }
+        else {
+            return Promise.resolve(id);
+        }
+    }
+
+    @httpPost('/login')
     public login(@request() req: express.Request, @response() res: express.Response) {
         this.userService.findUser(req.body.email).then(user => {
             if (user.password.verify(req.body.password)) {
@@ -44,17 +55,17 @@ export class AuthBasicController extends BaseHttpController implements interface
         });
     }
 
-    @httpPost('/register', TYPES.LoggingMiddleware)
+    @httpPost('/register')
     public register(@request() req: express.Request, @response() res: express.Response): Promise<User> {
         return this.userService.registerUser(req.body.strategy, req.body.email, req.body.familyName, req.body.givenName, req.body.oAuthData);
     }
 
-    @httpPost('/forgotpass', TYPES.LoggingMiddleware)
+    @httpPost('/forgotpass')
     public forgotpass(@request() req: express.Request, @response() res: express.Response): any {
         return this.userService.forgotPass(req.body.email);
     }
 
-    @httpPost('/resetpass/:token', TYPES.LoggingMiddleware)
+    @httpPost('/resetpass/:token')
     public resetpass(@requestParam('token') token: string, @request() req: express.Request, @response() res: express.Response): any {
         return this.userService.resetPass(req.body.email, token, req.body.password);
     }

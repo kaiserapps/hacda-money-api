@@ -3,7 +3,6 @@ export const TYPES = {
     Environment: Symbol('Environment'),
     InMemoryDb: Symbol('InMemoryDb'),
     // middleware
-    LoggingMiddleware: Symbol('LoggingMiddleware'),
     // providers
     CryptoProvider: Symbol('CryptoProvider'),
     DateProvider: Symbol('DateProvider'),
