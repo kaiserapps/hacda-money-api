@@ -29,16 +29,6 @@ export class AuthBasicController extends BaseHttpController implements interface
         this.jwt = environment.jwt || {};
     }
 
-    @httpGet('/test/:id')
-    public test(@requestParam('id') id: string) {
-        if (id === 'err') {
-            return Promise.reject(id);
-        }
-        else {
-            return Promise.resolve(id);
-        }
-    }
-
     @httpPost('/login')
     public login(@request() req: express.Request, @response() res: express.Response) {
         this.userService.findUser(req.body.email).then(user => {
