@@ -40,6 +40,7 @@ export class JwtStatic {
 
         return new Promise<any>((resolve, reject) => {
             jwt.verify(token, cert, {
+                algorithms: ['RS256'],
                 audience: jwtSettings.audience,
                 issuer: jwtSettings.issuer
             }, function(err, decoded) {

@@ -15,6 +15,8 @@ export class EnvironmentConfig {
         const settings: IEnvironment = {
             environment: envName,
             port: environment.port || 3000,
+            keyFile: environment.keyFile,
+            certFile: environment.certFile,
             url: environment.url,
             clientUrl: environment.clientUrl,
             useInMemoryDb: environment.useInMemoryDb || false,

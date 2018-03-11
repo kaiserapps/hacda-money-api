@@ -30,25 +30,32 @@ export class AuthBasicController extends BaseHttpController implements interface
         this.jwt = environment.jwt || {};
     }
 
+    @httpGet('/test')
+    public test() {
+        return this.httpContext.user;
+    }
+
     @httpGet('/login')
-    public login(@request() req: express.Request, @response() res: express.Response) {
+    public async login(@request() req: express.Request, @response() res: express.Response) {
         const credentials = auth(req);
         if (credentials) {
-            this.userService.findUser(credentials.name).then(user => {
+            await this.userService.findUser(credentials.name).then(user => {
                 if (user && user.password.verify(credentials.pass)) {
-                    this.authService.login(user).then(token => {
-                        res.cookie(this.jwt.cookieName, token, {
-                            maxAge: this.jwt.tokenExpiration * 1000
-                        });
-                    }).catch(() => this.sendBasicAuthChallenge(res));
+                    return this.authService.login(user);
                 }
                 else {
-                    this.sendBasicAuthChallenge(res);
+                    return Promise.reject('User credentials invalid.');
                 }
-            }).catch(() => this.sendBasicAuthChallenge(res));
+            }).then(token => {
+                res.cookie(this.jwt.cookieName, token, {
+                    maxAge: this.jwt.tokenExpiration * 1000,
+                    httpOnly: true,
+                    secure: true
+                });
+            }).catch(err => this.sendBasicAuthChallenge(res, err));
         }
         else {
-            this.sendBasicAuthChallenge(res);
+            this.sendBasicAuthChallenge(res, 'User credentials not provided.');
         }
     }
 
@@ -67,8 +74,8 @@ export class AuthBasicController extends BaseHttpController implements interface
         return this.userService.resetPass(req.body.email, token, req.body.password);
     }
 
-    private sendBasicAuthChallenge(res: express.Response) {
+    private sendBasicAuthChallenge(res: express.Response, error: string) {
         res.setHeader('WWW-Authenticate', 'Basic');
-        res.sendStatus(401);
+        res.sendStatus(401).json({ error: error });
     }
 }

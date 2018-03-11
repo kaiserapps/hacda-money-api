@@ -1,6 +1,8 @@
 export class IEnvironment {
     environment?: string;
     port?: number;
+    keyFile?: string;
+    certFile?: string;
     url?: string;
     clientUrl?: string;
     useInMemoryDb?: boolean;

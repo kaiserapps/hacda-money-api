@@ -5,6 +5,7 @@ export const environment: IEnvironment = {
     emailFrom: 'noreply@harrisburgcontra.org',
     jwt: {
         audiences: ['hacda-money-api'],
+        audience: 'hacda-money-api',
         issuer: 'hacda-money-api'
     }
 }

@@ -1,8 +1,10 @@
 // declares metadata by @controller annotation (must be first)
 import './api/controllers/_import-controllers';
 
+import * as fs from 'fs';
 import * as chalk from 'chalk';
 import * as path from 'path';
+import * as https from 'https';
 
 import { ContainerConfig } from './api/config/container.config';
 import { EnvironmentConfig } from './api/config/environment.config';
@@ -16,10 +18,14 @@ MongooseConfig.SetupSchemas();
 
 // create Express server
 const app = ExpressConfig.Configure(container, __dirname).build();
+const httpServ = https.createServer({
+    key: fs.readFileSync(settings.keyFile || ''),
+    cert: fs.readFileSync(settings.certFile || '')
+}, app);
 
 MongooseConfig.Connect(settings).then(() => {
     try {
-        app.listen(settings.port);
+        httpServ.listen(settings.port);
     }
     catch (err) {
         console.error(chalk.default.red(`Failed to listen on port ${settings.port}. Set the environment variable PORT to run on a different port.`));

@@ -1,3 +1,4 @@
+import * as chalk from 'chalk';
 import * as express from 'express';
 import { inject, injectable } from 'inversify';
 import { interfaces } from 'inversify-express-utils';
@@ -18,6 +19,9 @@ export class JwtAuthProvider implements interfaces.AuthProvider {
         if (!!authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
             return this._authService.checkToken(authHeader.split(' ')[1]).then(() => {
                 return this._authService.user;
+            }).catch(err => {
+                console.error(chalk.default.red(`Error authenticating JWT: ${err}`));
+                return new UnauthenticatedPrincipal();
             });
         }
         else {
