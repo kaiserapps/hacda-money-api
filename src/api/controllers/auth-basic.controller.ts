@@ -21,7 +21,7 @@ import { IUserService } from '../../service/user/user.service.interface';
 
 @controller('/auth/basic')
 export class AuthBasicController extends BaseHttpController implements interfaces.Controller {
-    jwt: any;
+    private _jwtSettings: any;
     constructor(
         @inject(TYPES.Environment) private environment: IEnvironment,
         @inject(TYPES.AuthService) private authService: IAuthService,
@@ -29,7 +29,7 @@ export class AuthBasicController extends BaseHttpController implements interface
         @inject(TYPES.CryptoProvider) private cryptoProvider: ICryptoProvider
     ) {
         super();
-        this.jwt = environment.jwt || {};
+        this._jwtSettings = environment.jwt || {};
     }
 
     @httpGet('/test')
@@ -49,8 +49,8 @@ export class AuthBasicController extends BaseHttpController implements interface
                     return Promise.reject('User credentials invalid.');
                 }
             }).then(token => {
-                res.cookie(this.jwt.cookieName, token, {
-                    maxAge: this.jwt.tokenExpiration * 1000,
+                res.cookie(this._jwtSettings.cookieName, token, {
+                    maxAge: this._jwtSettings.tokenExpiration * 1000,
                     httpOnly: true,
                     secure: true
                 });
