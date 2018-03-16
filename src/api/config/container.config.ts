@@ -19,6 +19,7 @@ import { IAuthService } from '../../service/auth/auth.service.interface';
 import { UserService } from '../../service/user/user.service';
 import { IUserService } from '../../service/user/user.service.interface';
 import { GoogleAuthMiddleware } from '../middleware/google-auth.middleware';
+import { OAuthSuccessMiddleware } from '../middleware/oauth-success.middleware';
 
 export class ContainerConfig {
     static Configure(settings: IEnvironment) {
@@ -33,6 +34,7 @@ export class ContainerConfig {
         }
         // middleware
         container.bind<GoogleAuthMiddleware>(TYPES.GoogleAuthMiddleware).to(GoogleAuthMiddleware).inRequestScope();
+        container.bind<OAuthSuccessMiddleware>(TYPES.OAuthSuccessMiddleware).to(OAuthSuccessMiddleware).inRequestScope();
         // providers
         container.bind<ICryptoProvider>(TYPES.CryptoProvider).to(CryptoProvider).inSingletonScope();
         container.bind<IDateProvider>(TYPES.DateProvider).to(MomentDateProvider).inSingletonScope();

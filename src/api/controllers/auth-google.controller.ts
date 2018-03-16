@@ -64,15 +64,6 @@ export class AuthGoogleController implements interfaces.Controller {
     @httpGet('/login', TYPES.GoogleAuthMiddleware)
     public login() { }
 
-    @httpGet('/callback', TYPES.GoogleAuthMiddleware)
-    public callback(
-        @request() req: express.Request,
-        @response() res: express.Response,
-    ) {
-        if (req.user) {
-            this.authService.login(req.user as User).then(token => {
-                res.redirect(`${req.protocol}://${this.environment.clientUrl}/auth/success?jwt=${token}`);
-            });
-        }
-    }
+    @httpGet('/callback', TYPES.GoogleAuthMiddleware, TYPES.OAuthSuccessMiddleware)
+    public callback() { }
 }
