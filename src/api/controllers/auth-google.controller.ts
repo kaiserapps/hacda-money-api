@@ -1,10 +1,11 @@
 import { inject } from 'inversify';
-import { controller, httpGet, interfaces, request } from 'inversify-express-utils';
+import { controller, httpGet, interfaces } from 'inversify-express-utils';
 import * as passport from 'passport';
 import * as google from 'passport-google-oauth2';
 
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
+import { AuthStrategy } from '../../providers/auth/enums';
 import { IUserService } from '../../service/user/user.service.interface';
 import { OAuthBaseController } from './oauth-base.controller';
 
@@ -14,7 +15,7 @@ export class AuthGoogleController extends OAuthBaseController implements interfa
         @inject(TYPES.Environment) environment: IEnvironment,
         @inject(TYPES.UserService) userService: IUserService
     ) {
-        super(environment, userService);
+        super(environment, userService, AuthStrategy.Google);
         if (environment.googleClientId && environment.googleClientSecret) {
             passport.use(new google.Strategy({
                 clientID: environment.googleClientId,

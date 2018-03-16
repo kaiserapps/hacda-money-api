@@ -1,4 +1,4 @@
-import { injectable } from 'inversify';
+import { injectable, unmanaged } from 'inversify';
 import { interfaces } from 'inversify-express-utils';
 import * as passport from 'passport';
 
@@ -8,17 +8,18 @@ import { AuthStrategy } from '../../providers/auth/enums';
 import { IUserService } from '../../service/user/user.service.interface';
 
 @injectable()
-export class OAuthBaseController implements interfaces.Controller {
+export abstract class OAuthBaseController implements interfaces.Controller {
     constructor(
-        protected environment: IEnvironment,
-        protected userService: IUserService
+        @unmanaged() protected environment: IEnvironment,
+        @unmanaged() protected userService: IUserService,
+        @unmanaged() protected strategy: AuthStrategy
     ) {
         passport.serializeUser((user: User, done) => {
             done(null, user.email);
         });
 
         passport.deserializeUser((id: string, done) => {
-            this.userService.findUser(id)
+            this.userService.findUser(this.strategy, id)
                 .then(user => {
                     user ? done(null, user) : done(`User ${id} not found`);
                 })
@@ -31,13 +32,13 @@ export class OAuthBaseController implements interfaces.Controller {
         refreshToken: string,
         profile: any
     ): Promise<User | null> {
-        return this.userService.findUser(this.getEmail(profile)).then(user => {
+        return this.userService.findUser(this.strategy, this.getEmail(profile)).then(user => {
             if (user) {
                 return user;
             }
             else {
-                return this.userService.registerUser(AuthStrategy.Google, this.getEmail(profile), profile.displayName, profile)
-                    .then(() => this.userService.findUser(this.getEmail(profile)));
+                return this.userService.registerOAuthUser(this.strategy, this.getEmail(profile), profile.displayName, profile)
+                    .then(() => this.userService.findUser(this.strategy, this.getEmail(profile)));
             }
         });
     }

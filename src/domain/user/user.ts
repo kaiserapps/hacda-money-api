@@ -80,7 +80,7 @@ export class User implements IUser {
         displayName: string,
         oAuthData?: any
     ): Promise<User> {
-        return userRepository.getUser(email).then(existingUser => {
+        return userRepository.getUser(strategy, email).then(existingUser => {
             if (!!existingUser) {
                 throw new Error(`User with email ${email} already exists.`);
             }

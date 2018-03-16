@@ -24,23 +24,26 @@ export class UserService implements IUserService {
         @inject(TYPES.EmailProvider) private emailProvider: IEmailProvider,
     ) { }
 
-    registerUser(strategy: AuthStrategy, email: string, displayName: string, oAuthData?: any): Promise<UserResponse> {
-        return User.register(this.userRepository, strategy, email, displayName, oAuthData).then(user => {
+    registerBasicUser(strategy: AuthStrategy, email: string, displayName: string, protocol: string): Promise<UserResponse> {
+        return User.register(this.userRepository, strategy, email, displayName).then(user => {
             return this.userRepository.createUser(user).then(() => {
-                if (strategy === AuthStrategy.Basic) {
-                    const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
-                    return this.setPasswordResetTokenAndSendEmail(user, resetToken, true)
-                        .then(() => new UserResponse(user));
-                }
-                else {
-                    return new UserResponse(user);
-                }
+                const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
+                return this.setPasswordResetTokenAndSendEmail(user, resetToken, protocol, true)
+                    .then(() => new UserResponse(user));
             });
         });
     }
 
-    addSession(email: string, token: string): Promise<void> {
-        return this.userRepository.getUser(email).then(user => {
+    registerOAuthUser(strategy: AuthStrategy, email: string, displayName: string, oAuthData?: any): Promise<UserResponse> {
+        return User.register(this.userRepository, strategy, email, displayName, oAuthData).then(user => {
+            return this.userRepository.createUser(user).then(() => {
+                return new UserResponse(user);
+            });
+        });
+    }
+
+    addSession(strategy: AuthStrategy, email: string, token: string): Promise<void> {
+        return this.userRepository.getUser(strategy, email).then(user => {
             if (user) {
                 if (!user.tokens) {
                     user.tokens = [];
@@ -54,16 +57,16 @@ export class UserService implements IUserService {
         });
     }
 
-    findUser(email: string): Promise<User | null> {
-        return this.userRepository.getUser(email);
+    findUser(strategy: AuthStrategy, email: string): Promise<User | null> {
+        return this.userRepository.getUser(strategy, email);
     }
 
-    forgotPass(email: string): Promise<string> {
-        return this.userRepository.getUser(email).then(user => {
+    forgotPass(strategy: AuthStrategy, email: string, protocol: string): Promise<string> {
+        return this.userRepository.getUser(strategy, email).then(user => {
             if (user) {
                 const expiration = this.environment.resetPassTokenExpiration || ONE_DAY_IN_SECONDS;
                 const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
-                return this.setPasswordResetTokenAndSendEmail(user, resetToken).then(() => resetToken);
+                return this.setPasswordResetTokenAndSendEmail(user, resetToken, protocol).then(() => resetToken);
             }
             else {
                 return Promise.reject(`User ${email} not found.`);
@@ -71,8 +74,8 @@ export class UserService implements IUserService {
         });
     }
 
-    resetPass(email: string, token: string, password: string): Promise<void> {
-        return this.userRepository.getUser(email).then(user => {
+    resetPass(strategy: AuthStrategy, email: string, token: string, password: string): Promise<void> {
+        return this.userRepository.getUser(strategy, email).then(user => {
             if (user) {
                 return user.resetPassword(this.dateProvider, token, Password.create(this.cryptoProvider, password));
             }
@@ -82,17 +85,19 @@ export class UserService implements IUserService {
         });
     }
 
-    private setPasswordResetTokenAndSendEmail(user: User, resetToken: string, isActivation?: boolean): Promise<IEmail> {
+    private setPasswordResetTokenAndSendEmail(user: User, resetToken: string, protocol: string, isActivation?: boolean): Promise<IEmail> {
         const action = isActivation ? 'activate your account' : 'reset your password';
         const title = isActivation ? 'Active Account' : 'Reset Password';
         return this.emailProvider.sendEmail(
             user.email,
             title,
-            `Please click the following link to ${action}.<br />
-            <a href="${this.environment.url}/auth/basic/resetpass/${resetToken}">${title}</a>`,
+            `<h1>Congratulations!</h1>` +
+            `<h2>Your account was successfully created on: ${protocol}://${this.environment.clientUrl}<h2>` +
+            `Please click the following link to ${action}.<br />` +
+            `<a href="${protocol}://${this.environment.url}/auth/basic/resetpass/${resetToken}">${title}</a>`,
             'accountManagement',
             {
-                'ClientUrl': this.environment.clientUrl
+                'ClientUrl': `${protocol}://${this.environment.clientUrl}`
             });
     }
 }

@@ -14,9 +14,10 @@ export class UserMongoRepository implements IUserRepository {
         this.UserModel = mongoose.model('User');
     }
 
-    getUser(email: string): Promise<User | null> {
+    getUser(strategy: AuthStrategy, email: string): Promise<User | null> {
         return new Promise<User>((resolve: any, reject: any) => {
             this.UserModel.find({
+                strategy: strategy,
                 email: email
             }, (err: any, users: any) => {
                 if (err) {

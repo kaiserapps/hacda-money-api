@@ -1,10 +1,11 @@
 import { inject } from 'inversify';
-import { controller, httpGet, interfaces, request } from 'inversify-express-utils';
+import { controller, httpGet, interfaces } from 'inversify-express-utils';
 import * as passport from 'passport';
 import * as facebook from 'passport-facebook';
 
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
+import { AuthStrategy } from '../../providers/auth/enums';
 import { IUserService } from '../../service/user/user.service.interface';
 import { OAuthBaseController } from './oauth-base.controller';
 
@@ -14,7 +15,7 @@ export class AuthFacebookController extends OAuthBaseController implements inter
         @inject(TYPES.Environment) environment: IEnvironment,
         @inject(TYPES.UserService) userService: IUserService
     ) {
-        super(environment, userService);
+        super(environment, userService, AuthStrategy.Facebook);
         if (environment.facebookClientId && environment.facebookClientSecret) {
             passport.use(new facebook.Strategy({
                 clientID: environment.facebookClientId,

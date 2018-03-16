@@ -49,7 +49,7 @@ export abstract class JwtProvider implements IJwtProvider {
                     reject(err);
                 }
                 else {
-                    this.userService.addSession(user.email, token).then(() => {
+                    this.userService.addSession(user.strategy, user.email, token).then(() => {
                         resolve(token);
                     });
                 }

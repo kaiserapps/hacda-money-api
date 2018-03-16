@@ -18,6 +18,7 @@ import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interfac
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { UserResponse } from '../../service/user/user-response';
 import { IUserService } from '../../service/user/user.service.interface';
+import { AuthStrategy } from '../../providers/auth/enums';
 
 @controller('/auth/basic')
 export class AuthBasicController extends BaseHttpController implements interfaces.Controller {
@@ -44,7 +45,7 @@ export class AuthBasicController extends BaseHttpController implements interface
     ) {
         const credentials = auth(req);
         if (credentials) {
-            await this.userService.findUser(credentials.name).then(user => {
+            await this.userService.findUser(AuthStrategy.Basic, credentials.name).then(user => {
                 if (user && user.password.verify(this.cryptoProvider, credentials.pass)) {
                     return this.authService.login(user);
                 }
@@ -69,7 +70,7 @@ export class AuthBasicController extends BaseHttpController implements interface
         @request() req: express.Request,
         @response() res: express.Response
     ): Promise<UserResponse> {
-        return this.userService.registerUser(req.body.strategy, req.body.email, req.body.displayName, req.body.oAuthData);
+        return this.userService.registerBasicUser(AuthStrategy.Basic, req.body.email, req.body.displayName, req.protocol);
     }
 
     @httpPost('/forgotpass')
@@ -77,7 +78,7 @@ export class AuthBasicController extends BaseHttpController implements interface
         @request() req: express.Request,
         @response() res: express.Response
     ): any {
-        return this.userService.forgotPass(req.body.email);
+        return this.userService.forgotPass(AuthStrategy.Basic, req.body.email, req.protocol);
     }
 
     @httpPost('/resetpass/:token')
@@ -86,7 +87,7 @@ export class AuthBasicController extends BaseHttpController implements interface
         @request() req: express.Request,
         @response() res: express.Response
     ): any {
-        return this.userService.resetPass(req.body.email, token, req.body.password);
+        return this.userService.resetPass(AuthStrategy.Basic, req.body.email, token, req.body.password);
     }
 
     private sendBasicAuthChallenge(res: express.Response, error: string) {
