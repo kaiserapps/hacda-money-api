@@ -4,7 +4,7 @@
     "description": "A money management API for the Harrisburg Area Contra Dance",
     "main": "./dist/server.js",
     "scripts": {
-        "start": "npm run build && nodemon ./dist/server.js",
+        "start": "npm run build && ncp ./src/dev ./dist/dev && nodemon ./dist/server.js",
         "test": "npm run build && jasmine --config=jasmine.json",
         "build": "npm run clean && tsc",
         "clean": "rimraf dist"
@@ -56,6 +56,7 @@
         "@types/passport-google-oauth2": "^0.1.1",
         "@types/uuid": "^3.4.3",
         "jasmine": "^3.0.0",
+        "ncp": "^2.0.0",
         "nodemon": "^1.14.12",
         "rimraf": "^2.6.2",
         "tslint": "^5.9.1",

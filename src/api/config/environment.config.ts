@@ -3,10 +3,10 @@ import * as CONSTS from '../../global-const';
 import * as path from 'path';
 
 export class EnvironmentConfig {
-    static Configure(env: NodeJS.ProcessEnv, configDir: string) {
+    static Configure(env: NodeJS.ProcessEnv, rootDir: string, configDir: string) {
         const envName = (env.NODE_ENVIRONMENT || 'development').toLowerCase();
-        const mainConfigFile = path.join(configDir, 'env.js');
-        const envConfigFile = path.join(configDir, `env.${envName}.js`);
+        const mainConfigFile = path.join(rootDir, configDir, 'env.js');
+        const envConfigFile = path.join(rootDir, configDir, `env.${envName}.js`);
 
         const mainEnv = require(mainConfigFile).environment as IEnvironment || {};
         const envEnv = require(envConfigFile).environment as IEnvironment || {};
@@ -17,8 +17,8 @@ export class EnvironmentConfig {
             httpPort: environment.httpPort || 3000,
             httpsPort: environment.httpsPort || 3443,
             allowHttp: environment.allowHttp || false,
-            keyFile: environment.keyFile,
-            certFile: environment.certFile,
+            keyFile: EnvironmentConfig.getAbsolutePath(rootDir, environment.keyFile),
+            certFile: EnvironmentConfig.getAbsolutePath(rootDir, environment.certFile),
             url: environment.url,
             clientUrl: environment.clientUrl,
             useInMemoryDb: environment.useInMemoryDb || false,
@@ -30,7 +30,7 @@ export class EnvironmentConfig {
             googleClientSecret: environment.googleClientSecret || env.GOOGLE_CLIENT_SECRET || '',
             resetPassTokenExpiration: environment.resetPassTokenExpiration || CONSTS.ONE_DAY_IN_SECONDS,
             useLocalEmail: environment.useLocalEmail || false,
-            localEmailPath: environment.localEmailPath || '',
+            localEmailPath: EnvironmentConfig.getAbsolutePath(rootDir, environment.localEmailPath),
             emailFrom: environment.emailFrom || 'noreply',
             sendGridApiKey: environment.sendGridApiKey || env.SEND_GRID_API_KEY,
             sendGridTemplates: environment.sendGridTemplates || {}
@@ -42,11 +42,16 @@ export class EnvironmentConfig {
                 audiences: environment.jwt.audiences || [],
                 audience: environment.jwt.audience,
                 issuer: environment.jwt.issuer,
-                privateKeyPath: environment.jwt.privateKeyPath,
-                publicKeyPath: environment.jwt.publicKeyPath
+                privateKeyPath: EnvironmentConfig.getAbsolutePath(rootDir, environment.jwt.privateKeyPath),
+                publicKeyPath: EnvironmentConfig.getAbsolutePath(rootDir, environment.jwt.publicKeyPath)
             };
         }
+
         return settings;
+    }
+
+    private static getAbsolutePath(rootDir: string, relativePath?: string): string {
+        return relativePath ? relativePath.length && relativePath[0] === '/' ? relativePath : path.join(rootDir, relativePath) : '';
     }
 
     private static mergeEnvironments = (mainEnv: any, updatedEnv: any): any => {

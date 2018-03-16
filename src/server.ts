@@ -1,20 +1,22 @@
 // declares metadata by @controller annotation (must be first)
 import './api/controllers/_import-controllers';
 
-import * as fs from 'fs';
 import * as chalk from 'chalk';
-import * as path from 'path';
+import * as express from 'express';
+import * as fs from 'fs';
 import * as http from 'http';
 import * as https from 'https';
+import * as path from 'path';
 
 import { ContainerConfig } from './api/config/container.config';
 import { EnvironmentConfig } from './api/config/environment.config';
 import { ExpressConfig } from './api/config/express.config';
 import { MongooseConfig } from './api/config/mongoose.config';
+import { TYPES } from './ioc.types';
 
 // Configure API
-const settings = EnvironmentConfig.Configure(process.env, path.join(__dirname, 'environments'));
-const container = ContainerConfig.Configure(settings, __dirname);
+const settings = EnvironmentConfig.Configure(process.env, __dirname, 'environments');
+const container = ContainerConfig.Configure(settings);
 MongooseConfig.SetupSchemas();
 
 // create Express server

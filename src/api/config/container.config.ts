@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import { Container } from 'inversify';
-import * as path from 'path';
 
 import { InMemoryDb } from '../../domain/in-memory.db';
 import { UserMemoryRepository } from '../../domain/user/user.memory.repository';
@@ -19,9 +18,10 @@ import { AuthService } from '../../service/auth/auth.service';
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { UserService } from '../../service/user/user.service';
 import { IUserService } from '../../service/user/user.service.interface';
+import { GoogleAuthMiddleware } from '../middleware/google-auth.middleware';
 
 export class ContainerConfig {
-    static Configure(settings: IEnvironment, rootDir: string) {
+    static Configure(settings: IEnvironment) {
         // set up container
         const container = new Container();
 
@@ -32,11 +32,11 @@ export class ContainerConfig {
             container.bind<InMemoryDb>(TYPES.InMemoryDb).toConstantValue(new InMemoryDb());
         }
         // middleware
+        container.bind<GoogleAuthMiddleware>(TYPES.GoogleAuthMiddleware).to(GoogleAuthMiddleware).inRequestScope();
         // providers
         container.bind<ICryptoProvider>(TYPES.CryptoProvider).to(CryptoProvider).inSingletonScope();
         container.bind<IDateProvider>(TYPES.DateProvider).to(MomentDateProvider).inSingletonScope();
-        if (settings.useLocalEmail) {
-            settings.localEmailPath = path.join(rootDir, settings.localEmailPath || '');
+        if (settings.useLocalEmail && settings.localEmailPath) {
             if (!fs.existsSync(settings.localEmailPath)) {
                 fs.mkdirSync(settings.localEmailPath);
             }

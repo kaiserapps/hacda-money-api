@@ -1,25 +1,24 @@
 import * as express from 'express';
 import { inject } from 'inversify';
-import { BaseHttpController, controller, httpGet, interfaces, next, request, response, queryParam } from 'inversify-express-utils';
+import { controller, httpGet, interfaces, request, response } from 'inversify-express-utils';
 import * as passport from 'passport';
 import * as google from 'passport-google-oauth2';
 
+import { User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { IUserService } from '../../service/user/user.service.interface';
-import { IUser, User } from '../../domain/user/user';
 
 @controller('/auth/google')
-export class AuthGoogleController extends BaseHttpController implements interfaces.Controller {
+export class AuthGoogleController implements interfaces.Controller {
     private _jwtSettings: any;
     constructor(
         @inject(TYPES.Environment) private environment: IEnvironment,
         @inject(TYPES.AuthService) private authService: IAuthService,
         @inject(TYPES.UserService) private userService: IUserService
     ) {
-        super();
         this._jwtSettings = environment.jwt || {};
 
         passport.serializeUser((user: User, done) => {
@@ -27,8 +26,12 @@ export class AuthGoogleController extends BaseHttpController implements interfac
         });
 
         passport.deserializeUser((id: string, done) => {
+            console.log(id);
             this.userService.findUser(id)
-                .then(user => user ? done(null, user) : done(`User ${id} not found`))
+                .then(user => {
+                    console.log(user);
+                    user ? done(null, user) : done(`User ${id} not found`);
+                })
                 .catch(err => done(err));
         });
 
@@ -37,11 +40,12 @@ export class AuthGoogleController extends BaseHttpController implements interfac
                 clientID: environment.googleClientId,
                 clientSecret: environment.googleClientSecret,
                 callbackURL: 'callback',
+                passReqToCallback: true,
                 scope: [
                     'https://www.googleapis.com/auth/plus.login',
                     'https://www.googleapis.com/auth/plus.profile.emails.read'
                 ]
-            }, (accessToken, refreshToken, profile, cb) => {
+            }, (request, accessToken, refreshToken, profile, cb) => {
                 this.userService.findUser(profile.email).then(user => {
                     if (user) {
                         cb(null, user);
@@ -57,27 +61,18 @@ export class AuthGoogleController extends BaseHttpController implements interfac
         }
     }
 
-    @httpGet('/login')
-    public login(
-        @request() req: express.Request,
-        @response() res: express.Response,
-        @next() nextFn: express.NextFunction
-    ) {
-        return passport.authenticate('google')(req, res, nextFn);
-    }
+    @httpGet('/login', TYPES.GoogleAuthMiddleware)
+    public login() { }
 
-    @httpGet('/callback')
+    @httpGet('/callback', TYPES.GoogleAuthMiddleware)
     public callback(
         @request() req: express.Request,
         @response() res: express.Response,
-        @next() nextFn: express.NextFunction
     ) {
-        return passport.authenticate('google', {
-            failureRedirect: `${req.protocol}://${this.environment.clientUrl}/auth/google/failure`,
-        }, (user: User) => {
-            this.authService.login(user as User).then(token => {
-                res.redirect(`${req.protocol}://${this.environment.clientUrl}/auth/google/success?jwt=${token}`);
+        if (req.user) {
+            this.authService.login(req.user as User).then(token => {
+                res.redirect(`${req.protocol}://${this.environment.clientUrl}/auth/success?jwt=${token}`);
             });
-        })(req, res, nextFn);
+        }
     }
 }

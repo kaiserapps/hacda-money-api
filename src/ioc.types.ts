@@ -2,7 +2,8 @@ export const TYPES = {
     // consts/static
     Environment: Symbol('Environment'),
     InMemoryDb: Symbol('InMemoryDb'),
-    // middleware
+    // app/middleware
+    GoogleAuthMiddleware: Symbol('GoogleAuthMiddleware'),
     // providers
     CryptoProvider: Symbol('CryptoProvider'),
     DateProvider: Symbol('DateProvider'),
