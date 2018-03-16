@@ -14,7 +14,9 @@ export class EnvironmentConfig {
 
         const settings: IEnvironment = {
             environment: envName,
-            port: environment.port || 3000,
+            httpPort: environment.httpPort || 3000,
+            httpsPort: environment.httpsPort || 3443,
+            allowHttp: environment.allowHttp || false,
             keyFile: environment.keyFile,
             certFile: environment.certFile,
             url: environment.url,

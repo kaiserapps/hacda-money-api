@@ -7,6 +7,8 @@ export class ErrorMiddleware {
             err = new Error(err);
         }
         console.error(chalk.default.red(`Unexpected error: ${err.message}`));
-        res.status(500).json({ error: err.message });
+        if (!res.headersSent) {
+            res.status(500).json({ error: err.message });
+        }
     }
 }

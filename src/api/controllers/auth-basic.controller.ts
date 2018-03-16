@@ -38,7 +38,10 @@ export class AuthBasicController extends BaseHttpController implements interface
     }
 
     @httpGet('/login')
-    public async login(@request() req: express.Request, @response() res: express.Response) {
+    public async login(
+        @request() req: express.Request,
+        @response() res: express.Response
+    ) {
         const credentials = auth(req);
         if (credentials) {
             await this.userService.findUser(credentials.name).then(user => {
@@ -62,17 +65,27 @@ export class AuthBasicController extends BaseHttpController implements interface
     }
 
     @httpPost('/register')
-    public register(@request() req: express.Request, @response() res: express.Response): Promise<UserResponse> {
+    public register(
+        @request() req: express.Request,
+        @response() res: express.Response
+    ): Promise<UserResponse> {
         return this.userService.registerUser(req.body.strategy, req.body.email, req.body.familyName, req.body.givenName, req.body.oAuthData);
     }
 
     @httpPost('/forgotpass')
-    public forgotpass(@request() req: express.Request, @response() res: express.Response): any {
+    public forgotpass(
+        @request() req: express.Request,
+        @response() res: express.Response
+    ): any {
         return this.userService.forgotPass(req.body.email);
     }
 
     @httpPost('/resetpass/:token')
-    public resetpass(@requestParam('token') token: string, @request() req: express.Request, @response() res: express.Response): any {
+    public resetpass(
+        @requestParam('token') token: string,
+        @request() req: express.Request,
+        @response() res: express.Response
+    ): any {
         return this.userService.resetPass(req.body.email, token, req.body.password);
     }
 

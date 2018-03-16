@@ -1,10 +1,11 @@
 import { IEnvironment } from './env.interface';
 
 export const environment: IEnvironment = {
+    allowHttp: true,
     keyFile: '/home/evan/.ssl/key.pem',
     certFile: '/home/evan/.ssl/key.crt',
-    url: 'https://localhost:3000',
-    clientUrl: 'https://localhost:4200',
+    url: 'localhost:3000',
+    clientUrl: 'localhost:4200',
     useInMemoryDb: true,
     useLocalEmail: true,
     localEmailPath: 'test-email',

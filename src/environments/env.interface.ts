@@ -1,6 +1,8 @@
 export class IEnvironment {
     environment?: string;
-    port?: number;
+    httpPort?: number;
+    httpsPort?: number;
+    allowHttp?: boolean;
     keyFile?: string;
     certFile?: string;
     url?: string;

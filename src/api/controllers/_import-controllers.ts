@@ -2,3 +2,4 @@
 import '../../polyfills';
 import './auth-basic.controller';
 import './auth-google.controller';
+import './error.controller';

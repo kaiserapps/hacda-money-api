@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { Container } from 'inversify';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import * as morgan from 'morgan';
+import * as passport from 'passport';
 import * as path from 'path';
 
 import { ErrorMiddleware } from '../../api/middleware/error.middleware';
@@ -21,6 +22,8 @@ export class ExpressConfig {
             }))
             // default body to JSON
             .use(bodyParser.json())
+            // passport initialization
+            .use(passport.initialize())
             // add console logging for just errors
             .use(morgan('dev', {
                 skip: (req, res) => res.statusCode < 400
