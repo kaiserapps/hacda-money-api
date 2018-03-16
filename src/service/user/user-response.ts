@@ -9,7 +9,7 @@ export class UserResponse {
     email: string;
     familyName: string;
     givenName: string;
-    resetToken: string;
+    resetToken?: string;
     roles: {
         id: RoleType,
         name: string

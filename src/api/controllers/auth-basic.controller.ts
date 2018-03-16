@@ -4,16 +4,17 @@ import { inject } from 'inversify';
 import {
     BaseHttpController,
     controller,
+    httpGet,
     httpPost,
     interfaces,
     request,
     requestParam,
     response,
-    httpGet,
 } from 'inversify-express-utils';
 
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
+import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { UserResponse } from '../../service/user/user-response';
 import { IUserService } from '../../service/user/user.service.interface';
@@ -24,7 +25,8 @@ export class AuthBasicController extends BaseHttpController implements interface
     constructor(
         @inject(TYPES.Environment) private environment: IEnvironment,
         @inject(TYPES.AuthService) private authService: IAuthService,
-        @inject(TYPES.UserService) private userService: IUserService
+        @inject(TYPES.UserService) private userService: IUserService,
+        @inject(TYPES.CryptoProvider) private cryptoProvider: ICryptoProvider
     ) {
         super();
         this.jwt = environment.jwt || {};
@@ -40,7 +42,7 @@ export class AuthBasicController extends BaseHttpController implements interface
         const credentials = auth(req);
         if (credentials) {
             await this.userService.findUser(credentials.name).then(user => {
-                if (user && user.password.verify(credentials.pass)) {
+                if (user && user.password.verify(this.cryptoProvider, credentials.pass)) {
                     return this.authService.login(user);
                 }
                 else {

@@ -10,19 +10,38 @@ import { Password } from './password';
 import { IUserRepository } from './user.repository.interface';
 import { ONE_DAY_IN_SECONDS } from '../../global-const';
 
-export class User {
+export class IUser {
+    id: string;
+    strategy: AuthStrategy;
+    email: string;
+    givenName: string;
+    familyName: string;
+    password: Password;
+    resetToken?: string;
+    resetTokenExpirationDate?: number;
+    locked?: boolean;
+    oAuthData?: any;
+    roles?: RoleType[];
+    tokens?: string[];
+}
+
+export class User implements IUser {
     _id: string;
     private _strategy: AuthStrategy;
     private _email: string;
     private _givenName: string;
     private _familyName: string;
     private _password: Password;
-    private _resetToken: string;
-    private _resetTokenExpirationDate: number;
-    locked: boolean;
-    oAuthData: any;
+    private _resetToken?: string;
+    private _resetTokenExpirationDate?: number;
+    private _locked: boolean;
+    oAuthData?: any;
     roles: RoleType[];
     tokens: string[];
+
+    get id(): string {
+        return this._id;
+    }
 
     get strategy(): AuthStrategy {
         return this._strategy;
@@ -40,15 +59,23 @@ export class User {
         return this._familyName;
     }
 
-    get resetToken(): string {
-        return this._resetToken;
-    }
-
     get password(): Password {
         return this._password;
     }
 
-    constructor() {
+    get resetToken(): string | undefined {
+        return this._resetToken;
+    }
+
+    get resetTokenExpirationDate(): number | undefined {
+        return this._resetTokenExpirationDate;
+    }
+
+    get locked(): boolean {
+        return this._locked;
+    }
+
+    private constructor() {
         this.roles = [];
     }
 
@@ -84,7 +111,8 @@ export class User {
     }
 
     resetPassword(dateProvider: IDateProvider, token: string, password: Password): Promise<void> {
-        if (token === this._resetToken || dateProvider.currentDateTicks > this._resetTokenExpirationDate) {
+        if (token === this._resetToken &&
+            dateProvider.currentDateTicks > (this._resetTokenExpirationDate || 0)) {
             this._password = password;
             return Promise.resolve();
         }
@@ -104,5 +132,21 @@ export class User {
         if (idx > -1) {
             this.roles.splice(idx, 1);
         }
+    }
+
+    static Fixture(data: IUser): User {
+        const u = new User();
+        u._id = data.id;
+        u._strategy = data.strategy;
+        u._email = data.email;
+        u._givenName = data.givenName;
+        u._familyName = data.familyName;
+        u._resetToken = data.resetToken;
+        u._password = data.password;
+        u._locked = data.locked || false;
+        u.oAuthData = data.oAuthData;
+        u.roles = data.roles || [];
+        u.tokens = data.tokens || [];
+        return u;
     }
 }
