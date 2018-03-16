@@ -14,8 +14,13 @@ export class GoogleAuthMiddleware extends BaseMiddleware {
         res: express.Response,
         next: express.NextFunction
     ) {
-        return passport.authenticate('google', {
-            failureRedirect: `${req.protocol}://${this.environment.clientUrl}/auth/failure`
-        })(req, res, next);
+        if (this.environment.googleClientId && this.environment.googleClientSecret) {
+            return passport.authenticate('google', {
+                failureRedirect: `${req.protocol}://${this.environment.clientUrl}/auth/failure`
+            })(req, res, next);
+        }
+        else {
+            res.sendStatus(500).json({ error: 'Google Auth is missing or configured incorrectly.' });
+        }
     }
 }

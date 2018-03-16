@@ -1,40 +1,20 @@
-import * as express from 'express';
 import { inject } from 'inversify';
-import { controller, httpGet, interfaces, request, response } from 'inversify-express-utils';
+import { controller, httpGet, interfaces, request } from 'inversify-express-utils';
 import * as passport from 'passport';
 import * as google from 'passport-google-oauth2';
 
-import { User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
-import { AuthStrategy } from '../../providers/auth/enums';
-import { IAuthService } from '../../service/auth/auth.service.interface';
 import { IUserService } from '../../service/user/user.service.interface';
+import { OAuthBaseController } from './oauth-base.controller';
 
 @controller('/auth/google')
-export class AuthGoogleController implements interfaces.Controller {
-    private _jwtSettings: any;
+export class AuthGoogleController extends OAuthBaseController implements interfaces.Controller {
     constructor(
-        @inject(TYPES.Environment) private environment: IEnvironment,
-        @inject(TYPES.AuthService) private authService: IAuthService,
-        @inject(TYPES.UserService) private userService: IUserService
+        @inject(TYPES.Environment) environment: IEnvironment,
+        @inject(TYPES.UserService) userService: IUserService
     ) {
-        this._jwtSettings = environment.jwt || {};
-
-        passport.serializeUser((user: User, done) => {
-            done(null, user.email);
-        });
-
-        passport.deserializeUser((id: string, done) => {
-            console.log(id);
-            this.userService.findUser(id)
-                .then(user => {
-                    console.log(user);
-                    user ? done(null, user) : done(`User ${id} not found`);
-                })
-                .catch(err => done(err));
-        });
-
+        super(environment, userService);
         if (environment.googleClientId && environment.googleClientSecret) {
             passport.use(new google.Strategy({
                 clientID: environment.googleClientId,
@@ -46,17 +26,9 @@ export class AuthGoogleController implements interfaces.Controller {
                     'https://www.googleapis.com/auth/plus.profile.emails.read'
                 ]
             }, (request, accessToken, refreshToken, profile, cb) => {
-                this.userService.findUser(profile.email).then(user => {
-                    if (user) {
-                        cb(null, user);
-                    }
-                    else {
-                        this.userService.registerUser(AuthStrategy.Google, profile.email, profile.family_name, profile.given_name, profile)
-                            .then(() => this.userService.findUser(profile.email))
-                            .then(regUser => regUser ? cb(null, regUser) : cb(`User ${profile.email} not registered successfully.`))
-                            .catch(err => cb(err));
-                    }
-                }).catch(err => cb(err));
+                this.verify(request, accessToken, refreshToken, profile)
+                    .then(user => user ? cb(null, user) : cb(`User ${profile.email} not registered successfully.`))
+                    .catch(err => cb(err));
             }));
         }
     }
