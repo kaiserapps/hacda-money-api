@@ -14,8 +14,7 @@ export class IUser {
     id: string;
     strategy: AuthStrategy;
     email: string;
-    givenName: string;
-    familyName: string;
+    displayName: string;
     password: Password;
     resetToken?: string;
     resetTokenExpirationDate?: number;
@@ -29,8 +28,7 @@ export class User implements IUser {
     _id: string;
     private _strategy: AuthStrategy;
     private _email: string;
-    private _givenName: string;
-    private _familyName: string;
+    private _displayName: string;
     private _password: Password;
     private _resetToken?: string;
     private _resetTokenExpirationDate?: number;
@@ -51,12 +49,8 @@ export class User implements IUser {
         return this._email;
     }
 
-    get givenName(): string {
-        return this._givenName;
-    }
-
-    get familyName(): string {
-        return this._familyName;
+    get displayName(): string {
+        return this._displayName;
     }
 
     get password(): Password {
@@ -83,8 +77,7 @@ export class User implements IUser {
         userRepository: IUserRepository,
         strategy: AuthStrategy,
         email: string,
-        familyName: string,
-        givenName: string,
+        displayName: string,
         oAuthData?: any
     ): Promise<User> {
         return userRepository.getUser(email).then(existingUser => {
@@ -95,8 +88,7 @@ export class User implements IUser {
                 const user = new User();
                 user._strategy = strategy;
                 user._email = email;
-                user._familyName = familyName;
-                user._givenName = givenName;
+                user._displayName = displayName;
                 user.oAuthData = oAuthData;
                 return user;
             }
@@ -139,8 +131,7 @@ export class User implements IUser {
         u._id = data.id;
         u._strategy = data.strategy;
         u._email = data.email;
-        u._givenName = data.givenName;
-        u._familyName = data.familyName;
+        u._displayName = data.displayName;
         u._resetToken = data.resetToken;
         u._password = data.password;
         u._locked = data.locked || false;

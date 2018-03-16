@@ -1,29 +1,26 @@
 import { inject } from 'inversify';
 import { controller, httpGet, interfaces, request } from 'inversify-express-utils';
 import * as passport from 'passport';
-import * as google from 'passport-google-oauth2';
+import * as facebook from 'passport-facebook';
 
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { IUserService } from '../../service/user/user.service.interface';
 import { OAuthBaseController } from './oauth-base.controller';
 
-@controller('/auth/google')
-export class AuthGoogleController extends OAuthBaseController implements interfaces.Controller {
+@controller('/auth/facebook')
+export class AuthFacebookController extends OAuthBaseController implements interfaces.Controller {
     constructor(
         @inject(TYPES.Environment) environment: IEnvironment,
         @inject(TYPES.UserService) userService: IUserService
     ) {
         super(environment, userService);
-        if (environment.googleClientId && environment.googleClientSecret) {
-            passport.use(new google.Strategy({
-                clientID: environment.googleClientId,
-                clientSecret: environment.googleClientSecret,
+        if (environment.facebookClientId && environment.facebookClientSecret) {
+            passport.use(new facebook.Strategy({
+                clientID: environment.facebookClientId,
+                clientSecret: environment.facebookClientSecret,
                 callbackURL: 'callback',
-                scope: [
-                    'https://www.googleapis.com/auth/plus.login',
-                    'https://www.googleapis.com/auth/plus.profile.emails.read'
-                ]
+                profileFields: ['id', 'displayName', 'name', 'profileUrl', 'email']
             }, (accessToken, refreshToken, profile, cb) => {
                 this.verify(accessToken, refreshToken, profile)
                     .then(user => user ? cb(null, user) : cb(`User ${this.getEmail(profile)} not registered successfully.`))
@@ -32,9 +29,13 @@ export class AuthGoogleController extends OAuthBaseController implements interfa
         }
     }
 
-    @httpGet('/login', TYPES.GoogleAuthMiddleware)
+    protected getEmail(profile: facebook.Profile): string {
+        return (profile.emails && profile.emails.length) ? profile.emails[0].value : '';
+    }
+
+    @httpGet('/login', TYPES.FacebookAuthMiddleware)
     public login() { }
 
-    @httpGet('/callback', TYPES.GoogleAuthMiddleware, TYPES.OAuthSuccessMiddleware)
+    @httpGet('/callback', TYPES.FacebookAuthMiddleware, TYPES.OAuthSuccessMiddleware)
     public callback() { }
 }

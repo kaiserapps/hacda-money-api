@@ -9,11 +9,16 @@ export class MongooseConfig {
         mongoose.model('User', new mongoose.Schema(UserSchema));
     }
 
-    static Connect(settings: IEnvironment): Promise<{}> {
-        (mongoose as any).Promise = global.Promise;
-        if (!settings.connectionString) {
-            throw new Error(`Connection string must be defined in one of the environment files.`);
+    static Connect(settings: IEnvironment): Promise<any> {
+        if (settings.useInMemoryDb) {
+            return Promise.resolve();
         }
-        return mongoose.connect(settings.connectionString);
+        else {
+            (mongoose as any).Promise = global.Promise;
+            if (!settings.connectionString) {
+                throw new Error(`Connection string must be defined in one of the environment files.`);
+            }
+            return mongoose.connect(settings.connectionString);
+        }
     }
 }

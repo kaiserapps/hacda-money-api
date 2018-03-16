@@ -9,6 +9,6 @@ export class ErrorController implements interfaces.Controller {
         @request() req: express.Request,
         @response() res: express.Response
     ) {
-        res.sendStatus(500).json({ error: err });
+        res.status(500).json({ error: err });
     }
 }

@@ -7,8 +7,7 @@ export class UserResponse {
     strategy: AuthStrategy;
     strategyName: string;
     email: string;
-    familyName: string;
-    givenName: string;
+    displayName: string;
     resetToken?: string;
     roles: {
         id: RoleType,
@@ -22,8 +21,7 @@ export class UserResponse {
         this.strategy = user.strategy;
         this.strategyName = AuthStrategy[user.strategy];
         this.email = user.email;
-        this.familyName = user.familyName;
-        this.givenName = user.givenName;
+        this.displayName = user.displayName;
         this.resetToken = user.resetToken;
         this.roles = user.roles.map(v => {
             return {

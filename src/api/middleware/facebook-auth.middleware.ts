@@ -7,20 +7,21 @@ import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 
 @injectable()
-export class GoogleAuthMiddleware extends BaseMiddleware {
+export class FacebookAuthMiddleware extends BaseMiddleware {
     @inject(TYPES.Environment) private readonly environment: IEnvironment;
     public handler(
         req: express.Request,
         res: express.Response,
         next: express.NextFunction
     ) {
-        if (this.environment.googleClientId && this.environment.googleClientSecret) {
-            return passport.authenticate('google', {
-                failureRedirect: `${req.protocol}://${this.environment.clientUrl}/auth/failure`
+        if (this.environment.facebookClientId && this.environment.facebookClientSecret) {
+            return passport.authenticate('facebook', {
+                failureRedirect: `${req.protocol}://${this.environment.clientUrl}/auth/failure`,
+                scope: ['email']
             })(req, res, next);
         }
         else {
-            res.status(500).json({ error: 'Google Auth is missing or configured incorrectly.' });
+            res.status(500).json({ error: 'Facebook Auth is missing or configured incorrectly.' });
         }
     }
 }

@@ -3,6 +3,7 @@ import { interfaces } from 'inversify-express-utils';
 import * as jwt from 'jsonwebtoken';
 
 import { User } from '../../domain/user/user';
+import { AuthStrategy } from './enums';
 import { IEnvironment } from '../../environments/env.interface';
 import { IUserService } from '../../service/user/user.service.interface';
 import { JwtPrincipal } from './jwt-principal';
@@ -29,10 +30,10 @@ export abstract class JwtProvider implements IJwtProvider {
         const cert = fs.readFileSync(this.jwt.privateKeyPath || '');
         const data = {
             strategy: user.strategy,
+            strategyName: AuthStrategy[user.strategy],
             roles: user.roles,
             email: user.email,
-            given_name: user.givenName,
-            family_name: user.familyName,
+            name: user.displayName,
             profile: (user.oAuthData || {}).profile_url
         };
         return new Promise<string>((resolve, reject) => {

@@ -71,13 +71,9 @@ export const UserSchema = {
         type: String,
         required: 'Email is required.'
     },
-    givenName: {
+    displayName: {
         type: String,
-        required: 'Given Name is required.'
-    },
-    familyName: {
-        type: String,
-        required: 'Family Name is required.'
+        required: 'Display Name is required.'
     },
     password: {
         hash: {

@@ -19,8 +19,7 @@ export class UserMemoryRepository implements IUserRepository {
             id: uuid4(),
             strategy: AuthStrategy.Basic,
             email: 'test@test.com',
-            givenName: 'Test',
-            familyName: 'User',
+            displayName: 'Test User',
             password: Password.Fixture(cryptoProvider.hashPassword('password'))
         }));
     }

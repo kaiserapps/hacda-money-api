@@ -69,7 +69,7 @@ export class AuthBasicController extends BaseHttpController implements interface
         @request() req: express.Request,
         @response() res: express.Response
     ): Promise<UserResponse> {
-        return this.userService.registerUser(req.body.strategy, req.body.email, req.body.familyName, req.body.givenName, req.body.oAuthData);
+        return this.userService.registerUser(req.body.strategy, req.body.email, req.body.displayName, req.body.oAuthData);
     }
 
     @httpPost('/forgotpass')
@@ -91,6 +91,6 @@ export class AuthBasicController extends BaseHttpController implements interface
 
     private sendBasicAuthChallenge(res: express.Response, error: string) {
         res.setHeader('WWW-Authenticate', 'Basic');
-        res.sendStatus(401).json({ error: error });
+        res.status(401).json({ error: error });
     }
 }
