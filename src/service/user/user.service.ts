@@ -36,9 +36,7 @@ export class UserService implements IUserService {
 
     registerOAuthUser(strategy: AuthStrategy, email: string, displayName: string, oAuthData?: any): Promise<UserResponse> {
         return User.register(this.userRepository, strategy, email, displayName, oAuthData).then(user => {
-            return this.userRepository.createUser(user).then(() => {
-                return new UserResponse(user);
-            });
+            return this.userRepository.createUser(user).then(() => new UserResponse(user));
         });
     }
 
