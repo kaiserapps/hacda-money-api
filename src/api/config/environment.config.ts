@@ -39,7 +39,6 @@ export class EnvironmentConfig {
         };
         if (environment.jwt) {
             settings.jwt = {
-                cookieName: environment.jwt.cookieName || 'HACDA_jwt',
                 tokenExpiration: environment.jwt.tokenExpiration || CONSTS.ONE_YEAR_IN_SECONDS,
                 audiences: environment.jwt.audiences || [],
                 audience: environment.jwt.audience,

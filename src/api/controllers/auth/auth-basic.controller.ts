@@ -1,27 +1,18 @@
 import * as auth from 'basic-auth';
 import * as express from 'express';
 import { inject } from 'inversify';
-import {
-    BaseHttpController,
-    controller,
-    httpGet,
-    httpPost,
-    interfaces,
-    request,
-    requestParam,
-    response,
-} from 'inversify-express-utils';
+import { controller, httpGet, httpPost, interfaces, request, requestParam, response } from 'inversify-express-utils';
 
-import { IEnvironment } from '../../environments/env.interface';
-import { TYPES } from '../../ioc.types';
-import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
-import { IAuthService } from '../../service/auth/auth.service.interface';
-import { UserResponse } from '../../service/user/user-response';
-import { IUserService } from '../../service/user/user.service.interface';
-import { AuthStrategy } from '../../providers/auth/enums';
+import { IEnvironment } from '../../../environments/env.interface';
+import { TYPES } from '../../../ioc.types';
+import { AuthStrategy } from '../../../providers/auth/enums';
+import { ICryptoProvider } from '../../../providers/crypto/crypto.provider.interface';
+import { IAuthService } from '../../../service/auth/auth.service.interface';
+import { UserResponse } from '../../../service/user/user-response';
+import { IUserService } from '../../../service/user/user.service.interface';
 
 @controller('/auth/basic')
-export class AuthBasicController extends BaseHttpController implements interfaces.Controller {
+export class AuthBasicController implements interfaces.Controller {
     private _jwtSettings: any;
     constructor(
         @inject(TYPES.Environment) private environment: IEnvironment,
@@ -29,13 +20,7 @@ export class AuthBasicController extends BaseHttpController implements interface
         @inject(TYPES.UserService) private userService: IUserService,
         @inject(TYPES.CryptoProvider) private cryptoProvider: ICryptoProvider
     ) {
-        super();
         this._jwtSettings = environment.jwt || {};
-    }
-
-    @httpGet('/test')
-    public test() {
-        return this.httpContext.user;
     }
 
     @httpGet('/login')
@@ -45,7 +30,7 @@ export class AuthBasicController extends BaseHttpController implements interface
     ) {
         const credentials = auth(req);
         if (credentials) {
-            await this.userService.findUser(AuthStrategy.Basic, credentials.name).then(user => {
+            return await this.userService.findUser(AuthStrategy.Basic, credentials.name).then(user => {
                 if (user && user.password.verify(this.cryptoProvider, credentials.pass)) {
                     return this.authService.login(user);
                 }
@@ -53,11 +38,9 @@ export class AuthBasicController extends BaseHttpController implements interface
                     return Promise.reject('User credentials invalid.');
                 }
             }).then(token => {
-                res.cookie(this._jwtSettings.cookieName, token, {
-                    maxAge: this._jwtSettings.tokenExpiration * 1000,
-                    httpOnly: true,
-                    secure: true
-                });
+                return {
+                    jwt: token
+                };
             }).catch(err => this.sendBasicAuthChallenge(res, err));
         }
         else {

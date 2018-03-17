@@ -9,15 +9,16 @@ import { IAuthService } from '../../service/auth/auth.service.interface';
 
 @injectable()
 export class OAuthSuccessMiddleware extends BaseMiddleware {
-    @inject(TYPES.AuthService) private readonly authService: IAuthService;
-    @inject(TYPES.Environment) private readonly environment: IEnvironment;
+    @inject(TYPES.AuthService) private readonly _authService: IAuthService;
+    @inject(TYPES.Environment) private readonly _environment: IEnvironment;
+
     public handler(
         req: express.Request,
         res: express.Response,
         next: express.NextFunction
     ) {
-        this.authService.login(req.user as User).then(token => {
-            res.redirect(`${req.protocol}://${this.environment.clientUrl}/auth/success?jwt=${token}`);
+        this._authService.login(req.user as User).then(token => {
+            res.redirect(`${req.protocol}://${this._environment.clientUrl}/auth/success?jwt=${token}`);
         });
     }
 }

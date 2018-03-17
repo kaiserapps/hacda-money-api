@@ -3,10 +3,10 @@ import { controller, httpGet, interfaces } from 'inversify-express-utils';
 import * as passport from 'passport';
 import * as google from 'passport-google-oauth2';
 
-import { IEnvironment } from '../../environments/env.interface';
-import { TYPES } from '../../ioc.types';
-import { AuthStrategy } from '../../providers/auth/enums';
-import { IUserService } from '../../service/user/user.service.interface';
+import { IEnvironment } from '../../../environments/env.interface';
+import { TYPES } from '../../../ioc.types';
+import { AuthStrategy } from '../../../providers/auth/enums';
+import { IUserService } from '../../../service/user/user.service.interface';
 import { OAuthBaseController } from './oauth-base.controller';
 
 @controller('/auth/google')

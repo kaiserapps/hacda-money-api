@@ -1,9 +1,6 @@
-import { interfaces } from 'inversify-express-utils';
-
-import { User } from '../../domain/user/user';
+import { IUser, User } from '../../domain/user/user';
 
 export interface IAuthService {
-    user: interfaces.Principal;
-    checkToken(token: string): Promise<void>;
+    checkToken(token: string): Promise<IUser>;
     login(user: User): Promise<string>;
 }

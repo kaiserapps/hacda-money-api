@@ -8,15 +8,15 @@ import { TYPES } from '../../ioc.types';
 
 @injectable()
 export class GoogleAuthMiddleware extends BaseMiddleware {
-    @inject(TYPES.Environment) private readonly environment: IEnvironment;
+    @inject(TYPES.Environment) private readonly _environment: IEnvironment;
     public handler(
         req: express.Request,
         res: express.Response,
         next: express.NextFunction
     ) {
-        if (this.environment.googleClientId && this.environment.googleClientSecret) {
+        if (this._environment.googleClientId && this._environment.googleClientSecret) {
             return passport.authenticate('google', {
-                failureRedirect: `${req.protocol}://${this.environment.clientUrl}/auth/failure`
+                failureRedirect: `${req.protocol}://${this._environment.clientUrl}/auth/failure`
             })(req, res, next);
         }
         else {

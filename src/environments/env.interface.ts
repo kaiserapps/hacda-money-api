@@ -23,7 +23,6 @@ export class IEnvironment {
     sendGridApiKey?: string;
     sendGridTemplates?: { [key: string]: string };
     jwt?: {
-        cookieName?: string;
         tokenExpiration?: number;
         audiences?: string[];
         audience?: string;

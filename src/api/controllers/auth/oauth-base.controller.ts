@@ -2,10 +2,10 @@ import { injectable, unmanaged } from 'inversify';
 import { interfaces } from 'inversify-express-utils';
 import * as passport from 'passport';
 
-import { User } from '../../domain/user/user';
-import { IEnvironment } from '../../environments/env.interface';
-import { AuthStrategy } from '../../providers/auth/enums';
-import { IUserService } from '../../service/user/user.service.interface';
+import { User } from '../../../domain/user/user';
+import { IEnvironment } from '../../../environments/env.interface';
+import { AuthStrategy } from '../../../providers/auth/enums';
+import { IUserService } from '../../../service/user/user.service.interface';
 
 @injectable()
 export abstract class OAuthBaseController implements interfaces.Controller {

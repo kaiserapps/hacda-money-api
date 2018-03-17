@@ -1,37 +1,41 @@
 import { inject, injectable } from 'inversify';
-import { interfaces } from 'inversify-express-utils';
 
-import { User } from '../../domain/user/user';
+import { IUser, User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
-import { JwtProvider } from '../../providers/auth/jwt.provider';
+import { JwtPrincipal } from '../../providers/auth/jwt-principal';
 import { JwtStatic } from '../../providers/auth/jwt.static';
+import { IUserProvider } from '../../providers/user/user.provider.interface';
 import { IUserService } from '../user/user.service.interface';
 import { IAuthService } from './auth.service.interface';
 
 @injectable()
 export class AuthService implements IAuthService {
-    private _user: interfaces.Principal;
-
-    public get user(): interfaces.Principal {
-        return this._user;
-    }
-
     constructor(
-        @inject(TYPES.Environment) public environment: IEnvironment,
-        @inject(TYPES.UserService) public userService: IUserService
+        @inject(TYPES.Environment) private environment: IEnvironment,
+        @inject(TYPES.UserService) private userService: IUserService,
+        @inject(TYPES.UserProvider) private userProvider: IUserProvider
     ) { }
 
-    public checkToken(token: string): Promise<void> {
+    public checkToken(token: string): Promise<IUser> {
         if (!token) {
             return Promise.reject(`Token is required.`);
         }
         return JwtStatic.getJwtProviderByToken(token, this.environment, this.userService).then(provider => {
             if (!provider) {
-                return Promise.reject(`Provider for bearer token not found.`);
+                throw new Error(`Provider for bearer token not found.`);
             }
             return provider.validateToken(token).then(principal => {
-                this._user = principal;
+                const typedPrincipal = principal as JwtPrincipal;
+                return this.userService.findUser(typedPrincipal.details.strategy, typedPrincipal.details.email).then(user => {
+                    if (user && user.tokens.indexOf(token) > -1) {
+                        this.userProvider.user = typedPrincipal;
+                        return typedPrincipal.details;
+                    }
+                    else {
+                        throw new Error(`Authorization token is invalid.`);
+                    }
+                });
             });
         });
     }

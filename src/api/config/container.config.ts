@@ -23,6 +23,7 @@ import { AuthService } from '../../service/auth/auth.service';
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { UserService } from '../../service/user/user.service';
 import { IUserService } from '../../service/user/user.service.interface';
+import { AuthorizeMiddleware } from '../middleware/authorize.middleware';
 import { FacebookAuthMiddleware } from '../middleware/facebook-auth.middleware';
 import { GithubAuthMiddleware } from '../middleware/github-auth.middleware';
 import { GoogleAuthMiddleware } from '../middleware/google-auth.middleware';
@@ -40,6 +41,7 @@ export class ContainerConfig {
             container.bind<InMemoryDb>(TYPES.InMemoryDb).toConstantValue(new InMemoryDb());
         }
         // middleware
+        container.bind<AuthorizeMiddleware>(TYPES.AuthorizeMiddleware).to(AuthorizeMiddleware).inRequestScope();
         container.bind<FacebookAuthMiddleware>(TYPES.FacebookAuthMiddleware).to(FacebookAuthMiddleware).inRequestScope();
         container.bind<GithubAuthMiddleware>(TYPES.GithubAuthMiddleware).to(GithubAuthMiddleware).inRequestScope();
         container.bind<GoogleAuthMiddleware>(TYPES.GoogleAuthMiddleware).to(GoogleAuthMiddleware).inRequestScope();
