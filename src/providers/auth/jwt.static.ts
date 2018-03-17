@@ -28,6 +28,9 @@ export class JwtStatic {
             case AuthStrategy.Facebook:
                 jwtProvider = new OAuthJwtProvider(userService, environment, environment.facebookClientId || '', environment.facebookClientSecret || '');
                 break;
+            case AuthStrategy.Github:
+                jwtProvider = new OAuthJwtProvider(userService, environment, environment.githubClientId || '', environment.githubClientSecret || '');
+                break;
             case AuthStrategy.Google:
                 jwtProvider = new OAuthJwtProvider(userService, environment, environment.googleClientId || '', environment.googleClientSecret || '');
                 break;

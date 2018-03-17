@@ -4,6 +4,7 @@ export const TYPES = {
     InMemoryDb: Symbol('InMemoryDb'),
     // app/middleware
     FacebookAuthMiddleware: Symbol('FacebookAuthMiddleware'),
+    GithubAuthMiddleware: Symbol('GithubAuthMiddleware'),
     GoogleAuthMiddleware: Symbol('GoogleAuthMiddleware'),
     OAuthSuccessMiddleware: Symbol('OAuthSuccessMiddleware'),
     // providers

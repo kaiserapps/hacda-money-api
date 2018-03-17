@@ -35,9 +35,8 @@
         "morgan": "^1.9.0",
         "passport": "^0.4.0",
         "passport-facebook": "^2.1.1",
+        "passport-github": "^1.1.0",
         "passport-google-oauth2": "^0.1.6",
-        "passport-http": "^0.3.0",
-        "passport-jwt": "^3.0.1",
         "reflect-metadata": "^0.1.12",
         "uuid": "^3.2.1"
     },
@@ -53,6 +52,7 @@
         "@types/node": "^9.4.5",
         "@types/passport": "^0.4.2",
         "@types/passport-facebook": "^2.1.7",
+        "@types/passport-github": "^1.1.2",
         "@types/passport-google-oauth2": "^0.1.1",
         "@types/uuid": "^3.4.3",
         "jasmine": "^3.0.0",

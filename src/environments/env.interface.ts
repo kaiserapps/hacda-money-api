@@ -12,6 +12,8 @@ export class IEnvironment {
     encryptionKey?: string;
     facebookClientId?: string;
     facebookClientSecret?: string;
+    githubClientId?: string;
+    githubClientSecret?: string;
     googleClientId?: string;
     googleClientSecret?: string;
     resetPassTokenExpiration?: number;

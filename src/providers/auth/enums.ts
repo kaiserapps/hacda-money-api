@@ -1,6 +1,7 @@
 export enum AuthStrategy {
     None = 0,
     Basic = 1,
-    Google = 2,
-    Facebook = 3
+    Facebook = 2,
+    Github = 3,
+    Google = 4
 }

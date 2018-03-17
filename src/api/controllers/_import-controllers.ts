@@ -2,5 +2,6 @@
 import '../../polyfills';
 import './auth-basic.controller';
 import './auth-facebook.controller';
+import './auth-github.controller';
 import './auth-google.controller';
 import './error.controller';

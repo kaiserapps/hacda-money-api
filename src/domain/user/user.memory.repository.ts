@@ -25,7 +25,7 @@ export class UserMemoryRepository implements IUserRepository {
     }
 
     getUser(strategy: AuthStrategy, email: string): Promise<User | null> {
-        const user = this.database.users.find(x => x.strategy == strategy && x.email === email) || null;
+        const user = this.database.users.find(x => x.strategy === strategy && x.email === email) || null;
         return Promise.resolve(user);
     }
 

@@ -26,6 +26,8 @@ export class EnvironmentConfig {
             encryptionKey: environment.encryptionKey || env.ENCRYPTION_KEY,
             facebookClientId: environment.facebookClientId || env.FACEBOOK_CLIENT_ID || '',
             facebookClientSecret: environment.facebookClientSecret || env.FACEBOOK_CLIENT_SECRET || '',
+            githubClientId: environment.githubClientId || env.GITHUB_CLIENT_ID || '',
+            githubClientSecret: environment.githubClientSecret || env.GITHUB_CLIENT_SECRET || '',
             googleClientId: environment.googleClientId || env.GOOGLE_CLIENT_ID || '',
             googleClientSecret: environment.googleClientSecret || env.GOOGLE_CLIENT_SECRET || '',
             resetPassTokenExpiration: environment.resetPassTokenExpiration || CONSTS.ONE_DAY_IN_SECONDS,

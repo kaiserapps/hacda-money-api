@@ -19,6 +19,7 @@ import { IAuthService } from '../../service/auth/auth.service.interface';
 import { UserService } from '../../service/user/user.service';
 import { IUserService } from '../../service/user/user.service.interface';
 import { FacebookAuthMiddleware } from '../middleware/facebook-auth.middleware';
+import { GithubAuthMiddleware } from '../middleware/github-auth.middleware';
 import { GoogleAuthMiddleware } from '../middleware/google-auth.middleware';
 import { OAuthSuccessMiddleware } from '../middleware/oauth-success.middleware';
 
@@ -35,6 +36,7 @@ export class ContainerConfig {
         }
         // middleware
         container.bind<FacebookAuthMiddleware>(TYPES.FacebookAuthMiddleware).to(FacebookAuthMiddleware).inRequestScope();
+        container.bind<GithubAuthMiddleware>(TYPES.GithubAuthMiddleware).to(GithubAuthMiddleware).inRequestScope();
         container.bind<GoogleAuthMiddleware>(TYPES.GoogleAuthMiddleware).to(GoogleAuthMiddleware).inRequestScope();
         container.bind<OAuthSuccessMiddleware>(TYPES.OAuthSuccessMiddleware).to(OAuthSuccessMiddleware).inRequestScope();
         // providers
