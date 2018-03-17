@@ -69,7 +69,7 @@ export class User implements IUser {
         return this._locked;
     }
 
-    private constructor() {
+    public constructor() {
         this.roles = [];
     }
 

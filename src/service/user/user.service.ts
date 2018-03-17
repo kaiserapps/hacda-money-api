@@ -9,7 +9,7 @@ import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { IEmailProvider, IEmail } from '../../providers/email/email.provider.interface';
+import { IEmail, IEmailProvider } from '../../providers/email/email.provider.interface';
 import { UserResponse } from './user-response';
 import { IUserService } from './user.service.interface';
 

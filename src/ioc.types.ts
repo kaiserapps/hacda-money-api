@@ -11,7 +11,9 @@ export const TYPES = {
     CryptoProvider: Symbol('CryptoProvider'),
     DateProvider: Symbol('DateProvider'),
     EmailProvider: Symbol('EmailProvider'),
+    UserProvider: Symbol('UserProvider'),
     // repositories
+    AuditRepository: Symbol('AuditRepository'),
     UserRepository: Symbol('UserRepository'),
     // services
     AuthService: Symbol('AuthService'),

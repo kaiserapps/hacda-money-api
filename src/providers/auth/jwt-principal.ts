@@ -1,10 +1,12 @@
 import { interfaces } from 'inversify-express-utils';
+
 import { RoleType } from '../../domain/user/enums';
+import { IUser } from '../../domain/user/user';
 
 export class JwtPrincipal implements interfaces.Principal {
-    private _details: any;
+    private _details: IUser;
 
-    get details(): any {
+    get details(): IUser {
         return this._details;
     }
 

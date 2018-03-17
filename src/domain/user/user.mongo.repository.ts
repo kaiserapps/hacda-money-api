@@ -1,8 +1,12 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Schema } from 'mongoose';
 import * as mongoose from 'mongoose';
 
+import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
+import { Audit } from '../audit/audit';
+import { IAuditRepository } from '../audit/audit.repository.interface';
+import { AuditClasses, AuditType } from '../audit/enums';
 import { User } from './user';
 import { IUserRepository } from './user.repository.interface';
 
@@ -10,7 +14,9 @@ import { IUserRepository } from './user.repository.interface';
 export class UserMongoRepository implements IUserRepository {
     UserModel: mongoose.Model<any>;
 
-    constructor() {
+    constructor(
+        @inject(TYPES.AuditRepository) public auditRepository: IAuditRepository
+    ) {
         this.UserModel = mongoose.model('User');
     }
 
@@ -31,6 +37,7 @@ export class UserMongoRepository implements IUserRepository {
     }
 
     createUser(user: User): Promise<void> {
+        this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Create, user));
         return new Promise<void>((resolve: any, reject: any) => {
             const newUser = new this.UserModel(user);
             newUser.save((err: any) => {
@@ -45,6 +52,7 @@ export class UserMongoRepository implements IUserRepository {
     }
 
     saveUser(user: User): Promise<void> {
+        this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Update, user));
         return new Promise<void>((resolve: any, reject: any) => {
             this.UserModel.findByIdAndUpdate(user._id, user, (err: any) => {
                 if (err) {
@@ -65,6 +73,7 @@ export const UserSchema = {
         enum: [
             AuthStrategy.Basic,
             AuthStrategy.Facebook,
+            AuthStrategy.Github,
             AuthStrategy.Google
         ]
     },

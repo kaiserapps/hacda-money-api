@@ -4,6 +4,9 @@ import * as uuid4 from 'uuid/v4';
 import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
+import { Audit } from '../audit/audit';
+import { IAuditRepository } from '../audit/audit.repository.interface';
+import { AuditClasses, AuditType } from '../audit/enums';
 import { InMemoryDb } from '../in-memory.db';
 import { Password } from './password';
 import { User } from './user';
@@ -13,7 +16,8 @@ import { IUserRepository } from './user.repository.interface';
 export class UserMemoryRepository implements IUserRepository {
     constructor(
         @inject(TYPES.InMemoryDb) private database: InMemoryDb,
-        @inject(TYPES.CryptoProvider) private cryptoProvider: ICryptoProvider
+        @inject(TYPES.CryptoProvider) private cryptoProvider: ICryptoProvider,
+        @inject(TYPES.AuditRepository) public auditRepository: IAuditRepository
     ) {
         this.createUser(User.Fixture({
             id: uuid4(),
@@ -31,6 +35,7 @@ export class UserMemoryRepository implements IUserRepository {
 
     createUser(user: User): Promise<void> {
         user._id = uuid4();
+        this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Create, user));
         this.database.users.push(user);
         return Promise.resolve();
     }
@@ -40,6 +45,7 @@ export class UserMemoryRepository implements IUserRepository {
         if (idx < 0) {
             return Promise.reject(`User with email address ${user.email} not found!`);
         }
+        this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Update, user));
         this.database.users[idx] = user;
         return Promise.resolve();
     }

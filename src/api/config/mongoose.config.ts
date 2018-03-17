@@ -1,11 +1,13 @@
 import * as mongoose from 'mongoose';
 
+import { AuditSchema } from '../../domain/audit/audit.mongo.repository';
 import { UserSchema } from '../../domain/user/user.mongo.repository';
 import { IEnvironment } from '../../environments/env.interface';
 
 export class MongooseConfig {
     static SetupSchemas() {
         // setup schemas
+        mongoose.model('Audit', new mongoose.Schema(AuditSchema));
         mongoose.model('User', new mongoose.Schema(UserSchema));
     }
 

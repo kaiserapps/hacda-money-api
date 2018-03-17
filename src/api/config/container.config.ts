@@ -1,6 +1,9 @@
 import * as fs from 'fs';
 import { Container } from 'inversify';
 
+import { AuditMemoryRepository } from '../../domain/audit/audit.memory.repository';
+import { AuditMongoRepository } from '../../domain/audit/audit.mongo.repository';
+import { IAuditRepository } from '../../domain/audit/audit.repository.interface';
 import { InMemoryDb } from '../../domain/in-memory.db';
 import { UserMemoryRepository } from '../../domain/user/user.memory.repository';
 import { UserMongoRepository } from '../../domain/user/user.mongo.repository';
@@ -14,6 +17,8 @@ import { MomentDateProvider } from '../../providers/date/moment-date.provider';
 import { IEmailProvider } from '../../providers/email/email.provider.interface';
 import { LocalEmailProvider } from '../../providers/email/local-email.provider';
 import { SendGridEmailProvider } from '../../providers/email/sendgrid-email.provider';
+import { UserProvider } from '../../providers/user/user.provider';
+import { IUserProvider } from '../../providers/user/user.provider.interface';
 import { AuthService } from '../../service/auth/auth.service';
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { UserService } from '../../service/user/user.service';
@@ -51,11 +56,14 @@ export class ContainerConfig {
         else {
             container.bind<IEmailProvider>(TYPES.EmailProvider).to(SendGridEmailProvider).inSingletonScope();
         }
+        container.bind<IUserProvider>(TYPES.UserProvider).to(UserProvider).inSingletonScope();
         // repositories
         if (settings.useInMemoryDb) {
+            container.bind<IAuditRepository>(TYPES.AuditRepository).to(AuditMemoryRepository).inRequestScope();
             container.bind<IUserRepository>(TYPES.UserRepository).to(UserMemoryRepository).inRequestScope();
         }
         else {
+            container.bind<IAuditRepository>(TYPES.AuditRepository).to(AuditMongoRepository).inRequestScope();
             container.bind<IUserRepository>(TYPES.UserRepository).to(UserMongoRepository).inRequestScope();
         }
         // services
