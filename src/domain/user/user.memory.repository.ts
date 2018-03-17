@@ -8,6 +8,7 @@ import { Audit } from '../audit/audit';
 import { IAuditRepository } from '../audit/audit.repository.interface';
 import { AuditClasses, AuditType } from '../audit/enums';
 import { InMemoryDb } from '../in-memory.db';
+import { RoleType } from './enums';
 import { Password } from './password';
 import { User } from './user';
 import { IUserRepository } from './user.repository.interface';
@@ -24,7 +25,10 @@ export class UserMemoryRepository implements IUserRepository {
             strategy: AuthStrategy.Basic,
             email: 'test@test.com',
             displayName: 'Test User',
-            password: Password.Fixture(cryptoProvider.hashPassword('password'))
+            password: Password.Fixture(cryptoProvider.hashPassword('password')),
+            roles: [
+                RoleType.User
+            ]
         }));
     }
 

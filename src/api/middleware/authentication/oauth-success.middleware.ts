@@ -2,10 +2,10 @@ import * as express from 'express';
 import { inject, injectable } from 'inversify';
 import { BaseMiddleware } from 'inversify-express-utils';
 
-import { User } from '../../domain/user/user';
-import { IEnvironment } from '../../environments/env.interface';
-import { TYPES } from '../../ioc.types';
-import { IAuthService } from '../../service/auth/auth.service.interface';
+import { User } from '../../../domain/user/user';
+import { IEnvironment } from '../../../environments/env.interface';
+import { TYPES } from '../../../ioc.types';
+import { IAuthService } from '../../../service/auth/auth.service.interface';
 
 @injectable()
 export class OAuthSuccessMiddleware extends BaseMiddleware {

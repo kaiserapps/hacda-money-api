@@ -23,11 +23,14 @@ import { AuthService } from '../../service/auth/auth.service';
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { UserService } from '../../service/user/user.service';
 import { IUserService } from '../../service/user/user.service.interface';
-import { AuthorizeMiddleware } from '../middleware/authorize.middleware';
-import { FacebookAuthMiddleware } from '../middleware/facebook-auth.middleware';
-import { GithubAuthMiddleware } from '../middleware/github-auth.middleware';
-import { GoogleAuthMiddleware } from '../middleware/google-auth.middleware';
-import { OAuthSuccessMiddleware } from '../middleware/oauth-success.middleware';
+import { FacebookAuthMiddleware } from '../middleware/authentication/facebook-auth.middleware';
+import { GithubAuthMiddleware } from '../middleware/authentication/github-auth.middleware';
+import { GoogleAuthMiddleware } from '../middleware/authentication/google-auth.middleware';
+import { OAuthSuccessMiddleware } from '../middleware/authentication/oauth-success.middleware';
+import { AdminAuthMiddleware } from '../middleware/authorization/admin-auth.middleware';
+import { AuditAuthMiddleware } from '../middleware/authorization/audit-auth.middleware';
+import { AuthorizeMiddleware } from '../middleware/authorization/authorize.middleware';
+import { UserAuthMiddleware } from '../middleware/authorization/user-auth.middleware';
 
 export class ContainerConfig {
     static Configure(settings: IEnvironment) {
@@ -41,6 +44,9 @@ export class ContainerConfig {
             container.bind<InMemoryDb>(TYPES.InMemoryDb).toConstantValue(new InMemoryDb());
         }
         // middleware
+        container.bind<AdminAuthMiddleware>(TYPES.AdminAuthMiddleware).to(AdminAuthMiddleware).inRequestScope();
+        container.bind<AuditAuthMiddleware>(TYPES.AuditAuthMiddleware).to(AuditAuthMiddleware).inRequestScope();
+        container.bind<UserAuthMiddleware>(TYPES.UserAuthMiddleware).to(UserAuthMiddleware).inRequestScope();
         container.bind<AuthorizeMiddleware>(TYPES.AuthorizeMiddleware).to(AuthorizeMiddleware).inRequestScope();
         container.bind<FacebookAuthMiddleware>(TYPES.FacebookAuthMiddleware).to(FacebookAuthMiddleware).inRequestScope();
         container.bind<GithubAuthMiddleware>(TYPES.GithubAuthMiddleware).to(GithubAuthMiddleware).inRequestScope();

@@ -3,10 +3,10 @@ import * as express from 'express';
 import { inject, injectable } from 'inversify';
 import { interfaces } from 'inversify-express-utils';
 
-import { TYPES } from '../../ioc.types';
-import { UnauthenticatedPrincipal } from '../../providers/auth/unauthenticated-principal';
-import { IUserProvider } from '../../providers/user/user.provider.interface';
-import { IAuthService } from '../../service/auth/auth.service.interface';
+import { TYPES } from '../../../ioc.types';
+import { UnauthenticatedPrincipal } from '../../../providers/auth/unauthenticated-principal';
+import { IUserProvider } from '../../../providers/user/user.provider.interface';
+import { IAuthService } from '../../../service/auth/auth.service.interface';
 
 @injectable()
 export class JwtAuthProvider implements interfaces.AuthProvider {

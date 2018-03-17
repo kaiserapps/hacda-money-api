@@ -17,4 +17,25 @@ export class TestAuthController extends BaseHttpController implements interfaces
             user: this.httpContext.user
         }
     }
+
+    @httpGet('/admin-only', TYPES.AdminAuthMiddleware)
+    public adminOnly() {
+        return {
+            user: this.httpContext.user
+        }
+    }
+
+    @httpGet('/audit-or-admin-only', TYPES.AuditAuthMiddleware)
+    public auditOnly() {
+        return {
+            user: this.httpContext.user
+        }
+    }
+
+    @httpGet('/user-or-admin-only', TYPES.UserAuthMiddleware)
+    public userOnly() {
+        return {
+            user: this.httpContext.user
+        }
+    }
 }

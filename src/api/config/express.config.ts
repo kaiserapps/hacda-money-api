@@ -6,8 +6,8 @@ import * as morgan from 'morgan';
 import * as passport from 'passport';
 import * as path from 'path';
 
+import { JwtAuthProvider } from '../../api/middleware/authentication/jwt-auth.provider';
 import { ErrorMiddleware } from '../../api/middleware/error.middleware';
-import { JwtAuthProvider } from '../../api/middleware/jwt-auth.provider';
 
 export class ExpressConfig {
     static Configure(container: Container, logDirectory: string) {

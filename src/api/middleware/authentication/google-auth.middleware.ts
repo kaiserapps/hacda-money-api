@@ -3,8 +3,8 @@ import { inject, injectable } from 'inversify';
 import { BaseMiddleware } from 'inversify-express-utils';
 import * as passport from 'passport';
 
-import { IEnvironment } from '../../environments/env.interface';
-import { TYPES } from '../../ioc.types';
+import { IEnvironment } from '../../../environments/env.interface';
+import { TYPES } from '../../../ioc.types';
 
 @injectable()
 export class GoogleAuthMiddleware extends BaseMiddleware {
