@@ -1,21 +1,20 @@
 import * as uuid from 'uuid/v4';
 
 import { IEnvironment } from '../../environments/env.interface';
-import { AuthStrategy } from '../../providers/auth/enums';
-import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
-import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { IEmailProvider } from '../../providers/email/email.provider.interface';
-import { RoleType } from './enums';
-import { Password } from './password';
-import { IUserRepository } from './user.repository.interface';
 import { ONE_DAY_IN_SECONDS } from '../../global-const';
+import { AuthStrategy } from '../../providers/auth/enums';
+import { IPassword } from './password';
+import { IDateProvider } from '../../providers/date/date.provider.interface';
+import { RoleType } from './enums';
+import { NullPassword } from './password';
+import { IUserRepository } from './user.repository.interface';
 
 export class IUser {
     id: string;
     strategy: AuthStrategy;
     email: string;
     displayName: string;
-    password: Password;
+    password: IPassword;
     resetToken?: string;
     resetTokenExpirationDate?: number;
     locked?: boolean;
@@ -29,7 +28,7 @@ export class User implements IUser {
     private _strategy: AuthStrategy;
     private _email: string;
     private _displayName: string;
-    private _password: Password;
+    private _password: IPassword;
     private _resetToken?: string;
     private _resetTokenExpirationDate?: number;
     private _locked: boolean;
@@ -53,7 +52,7 @@ export class User implements IUser {
         return this._displayName;
     }
 
-    get password(): Password {
+    get password(): IPassword {
         return this._password;
     }
 
@@ -70,6 +69,7 @@ export class User implements IUser {
     }
 
     public constructor() {
+        this._password = new NullPassword();
         this.roles = [];
     }
 
@@ -102,7 +102,7 @@ export class User implements IUser {
         return this._resetToken;
     }
 
-    resetPassword(dateProvider: IDateProvider, token: string, password: Password): Promise<void> {
+    resetPassword(dateProvider: IDateProvider, token: string, password: IPassword): Promise<void> {
         if (token === this._resetToken &&
             dateProvider.currentDateTicks > (this._resetTokenExpirationDate || 0)) {
             this._password = password;

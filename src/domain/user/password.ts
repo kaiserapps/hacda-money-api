@@ -1,8 +1,13 @@
-import { ICryptoProvider, IPassword } from '../../providers/crypto/crypto.provider.interface';
+import { ICryptoProvider, IPasswordData } from '../../providers/crypto/crypto.provider.interface';
+
+export interface IPassword extends IPasswordData {
+    isNull?: boolean;
+    verify(cryptoProvider: ICryptoProvider, password: string): boolean;
+}
 
 export class Password implements IPassword {
-    private _hash: string;
-    private _salt: string;
+    private _hash = '';
+    private _salt = '';
 
     get hash(): string {
         return this._hash;
@@ -12,7 +17,11 @@ export class Password implements IPassword {
         return this._salt;
     }
 
-    private constructor() { }
+    get isNull(): boolean {
+        return false;
+    }
+
+    protected constructor() { }
 
     static create(
         cryptoProvider: ICryptoProvider,
@@ -26,16 +35,30 @@ export class Password implements IPassword {
     }
 
     verify(cryptoProvider: ICryptoProvider, password: string): boolean {
+        if (this.isNull) {
+            return false;
+        }
+
         return cryptoProvider.verifyPassword(password, {
             hash: this._hash,
             salt: this._salt
         });
     }
 
-    static Fixture(data: IPassword): Password {
+    static Fixture(data: IPasswordData): Password {
         const p = new Password();
         p._hash = data.hash;
         p._salt = data.salt;
         return p;
+    }
+}
+
+export class NullPassword extends Password implements IPassword {
+    get isNull(): boolean {
+        return true;
+    }
+
+    constructor() {
+        super();
     }
 }
