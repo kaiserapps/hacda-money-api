@@ -1,5 +1,5 @@
 import { RoleType } from '../../domain/user/enums';
-import { User } from '../../domain/user/user';
+import { IUserData } from '../../domain/user/user';
 import { AuthStrategy } from '../../providers/auth/enums';
 
 export class UserResponse {
@@ -15,19 +15,19 @@ export class UserResponse {
     }[];
 
     constructor(
-        user: User
+        user: IUserData
     ) {
-        this.id = user._id;
+        this.id = user.id;
         this.strategy = user.strategy;
         this.strategyName = AuthStrategy[user.strategy];
         this.email = user.email;
         this.displayName = user.displayName;
         this.resetToken = user.resetToken;
-        this.roles = user.roles.map(v => {
+        this.roles = user.roles ? user.roles.map(v => {
             return {
                 id: v,
                 name: RoleType[v]
             };
-        });
+        }) : [];
     }
 }

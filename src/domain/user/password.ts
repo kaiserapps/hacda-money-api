@@ -26,7 +26,7 @@ export class Password implements IPassword {
     static create(
         cryptoProvider: ICryptoProvider,
         password: string
-    ): Password {
+    ): IPassword {
         const hashInfo = cryptoProvider.hashPassword(password);
         const pass = new Password();
         pass._hash = hashInfo.hash;

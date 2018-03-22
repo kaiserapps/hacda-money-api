@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 
 import { Password } from '../../domain/user/password';
-import { User } from '../../domain/user/user';
+import { User, IUser } from '../../domain/user/user';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
 import { ONE_DAY_IN_SECONDS } from '../../global-const';
@@ -27,6 +27,7 @@ export class UserService implements IUserService {
     registerBasicUser(strategy: AuthStrategy, email: string, displayName: string, protocol: string): Promise<UserResponse> {
         return User.register(this.userRepository, strategy, email, displayName).then(user => {
             return this.userRepository.createUser(user).then(() => {
+                console.log(user);
                 const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
                 return this.setPasswordResetTokenAndSendEmail(user, resetToken, protocol, true)
                     .then(() => new UserResponse(user));
@@ -55,7 +56,7 @@ export class UserService implements IUserService {
         });
     }
 
-    findUser(strategy: AuthStrategy, email: string): Promise<User | null> {
+    findUser(strategy: AuthStrategy, email: string): Promise<IUser | null> {
         return this.userRepository.getUser(strategy, email);
     }
 
@@ -83,7 +84,7 @@ export class UserService implements IUserService {
         });
     }
 
-    private setPasswordResetTokenAndSendEmail(user: User, resetToken: string, protocol: string, isActivation?: boolean): Promise<IEmail> {
+    private setPasswordResetTokenAndSendEmail(user: IUser, resetToken: string, protocol: string, isActivation?: boolean): Promise<IEmail> {
         const action = isActivation ? 'activate your account' : 'reset your password';
         const title = isActivation ? 'Active Account' : 'Reset Password';
         return this.emailProvider.sendEmail(

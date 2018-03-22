@@ -28,7 +28,7 @@ export class AuthService implements IAuthService {
             return provider.validateToken(token).then(principal => {
                 const typedPrincipal = principal as JwtPrincipal;
                 return this.userService.findUser(typedPrincipal.details.strategy, typedPrincipal.details.email).then(user => {
-                    if (user && user.tokens.indexOf(token) > -1) {
+                    if (user && user.tokens && user.tokens.indexOf(token) > -1) {
                         this.userProvider.user = typedPrincipal;
                         return typedPrincipal.details;
                     }

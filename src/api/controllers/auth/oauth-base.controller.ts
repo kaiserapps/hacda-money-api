@@ -2,7 +2,7 @@ import { injectable, unmanaged } from 'inversify';
 import { interfaces } from 'inversify-express-utils';
 import * as passport from 'passport';
 
-import { User } from '../../../domain/user/user';
+import { IUser, User } from '../../../domain/user/user';
 import { IEnvironment } from '../../../environments/env.interface';
 import { AuthStrategy } from '../../../providers/auth/enums';
 import { IUserService } from '../../../service/user/user.service.interface';
@@ -31,7 +31,7 @@ export abstract class OAuthBaseController implements interfaces.Controller {
         accessToken: string,
         refreshToken: string,
         profile: any
-    ): Promise<User | null> {
+    ): Promise<IUser | null> {
         return this.userService.findUser(this.strategy, this.getEmail(profile)).then(user => {
             if (user) {
                 return user;

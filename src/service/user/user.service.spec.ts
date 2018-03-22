@@ -2,7 +2,7 @@ import * as TypeMoq from 'typemoq';
 import * as uuid4 from 'uuid/v4';
 
 import { NullPassword, Password } from '../../domain/user/password';
-import { User } from '../../domain/user/user';
+import { IUser, User } from '../../domain/user/user';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
 import { AuthStrategy } from '../../providers/auth/enums';
@@ -42,8 +42,8 @@ describe('user service', () => {
         it('creates user on repository', done => {
             // Arrange
             const anyUser = TypeMoq.It.isAnyObject<User>(User);
-            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve());
-            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(null));
+            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve()).verifiable();
+            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(null)).verifiable();
 
             // Act
             userService.registerBasicUser(AuthStrategy.Basic, 'test@test.com', 'Test User', 'http')
@@ -52,8 +52,8 @@ describe('user service', () => {
                     userRepo.verify(x => x.createUser(anyUser), TypeMoq.Times.once());
                     done();
                 })
-                .catch(() => {
-                    fail('unexpected promise rejection');
+                .catch(err => {
+                    fail(err);
                     done();
                 });
         });
@@ -61,7 +61,7 @@ describe('user service', () => {
         it('does not create user if registration failed', done => {
             // Arrange
             const anyUser = TypeMoq.It.isAnyObject<User>(User);
-            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve());
+            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve()).verifiable();
             const duplicateUser = User.Fixture({
                 id: uuid4(),
                 strategy: AuthStrategy.Basic,
@@ -69,10 +69,10 @@ describe('user service', () => {
                 displayName: 'Test User',
                 password: Password.Fixture({hash: '', salt: ''})
             });
-            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(duplicateUser));
+            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(duplicateUser)).verifiable();
 
             // Act
-            userService.registerOAuthUser(AuthStrategy.Facebook, 'test@test.com', 'Test User')
+            userService.registerBasicUser(AuthStrategy.Basic, 'test@test.com', 'Test User', 'http')
                 .then(() => {
                     fail('unexpected promise resolve');
                     done();
@@ -84,6 +84,29 @@ describe('user service', () => {
                     done();
                 });
         });
+
+        it('sends password reset email', done => {
+            // Arrange
+            const anyUser = TypeMoq.It.isAnyObject<User>(User);
+            const createdUser = TypeMoq.Mock.ofType<IUser>();
+            createdUser.setup(x => x.initiatePasswordReset(dateProv.object, env.object)).returns(() => 'testtoken123').verifiable();
+            const userType = TypeMoq.Mock.ofType<typeof User>();
+            userType.setup(x => x.register(userRepo.object, TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(createdUser.object)).verifiable();
+            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve()).verifiable();
+            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(null)).verifiable();
+
+            // Act
+            userService.registerBasicUser(AuthStrategy.Basic, 'test@test.com', 'Test User', 'http')
+                .then(user => {
+                    // Assert
+                    createdUser.verify(x => x.initiatePasswordReset(dateProv.object, env.object), TypeMoq.Times.once());
+                    done();
+                })
+                .catch(err => {
+                    fail(err);
+                    done();
+                });
+        });
     });
 
     describe('register oauth', () => {
@@ -91,8 +114,8 @@ describe('user service', () => {
         it('creates user on repository', done => {
             // Arrange
             const anyUser = TypeMoq.It.isAnyObject<User>(User);
-            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve());
-            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(null));
+            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve()).verifiable();
+            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(null)).verifiable();
 
             // Act
             userService.registerOAuthUser(AuthStrategy.Facebook, 'test@test.com', 'Test User')
@@ -101,8 +124,8 @@ describe('user service', () => {
                     userRepo.verify(x => x.createUser(anyUser), TypeMoq.Times.once());
                     done();
                 })
-                .catch(() => {
-                    fail('unexpected promise rejection');
+                .catch(err => {
+                    fail(err);
                     done();
                 });
         });
@@ -110,7 +133,7 @@ describe('user service', () => {
         it('does not create user if registration failed', done => {
             // Arrange
             const anyUser = TypeMoq.It.isAnyObject<User>(User);
-            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve());
+            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve()).verifiable();
             const duplicateUser = User.Fixture({
                 id: uuid4(),
                 strategy: AuthStrategy.Facebook,
@@ -118,7 +141,7 @@ describe('user service', () => {
                 displayName: 'Test User',
                 password: new NullPassword()
             });
-            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(duplicateUser));
+            userRepo.setup(x => x.getUser(TypeMoq.It.isAnyNumber(), TypeMoq.It.isAnyString())).returns(() => Promise.resolve(duplicateUser)).verifiable();
 
             // Act
             userService.registerOAuthUser(AuthStrategy.Facebook, 'test@test.com', 'Test User')

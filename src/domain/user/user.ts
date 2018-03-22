@@ -9,7 +9,7 @@ import { RoleType } from './enums';
 import { NullPassword } from './password';
 import { IUserRepository } from './user.repository.interface';
 
-export class IUser {
+export interface IUserData {
     id: string;
     strategy: AuthStrategy;
     email: string;
@@ -21,6 +21,13 @@ export class IUser {
     oAuthData?: any;
     roles?: RoleType[];
     tokens?: string[];
+}
+
+export interface IUser extends IUserData {
+    initiatePasswordReset(dateProvider: IDateProvider, environment: IEnvironment): string;
+    resetPassword(dateProvider: IDateProvider, token: string, password: IPassword): Promise<void>;
+    addRole(type: RoleType): void;
+    removeRole(type: RoleType): void;
 }
 
 export class User implements IUser {
@@ -79,7 +86,7 @@ export class User implements IUser {
         email: string,
         displayName: string,
         oAuthData?: any
-    ): Promise<User> {
+    ): Promise<IUser> {
         return userRepository.getUser(strategy, email).then(existingUser => {
             if (!!existingUser) {
                 throw new Error(`User with email ${email} already exists.`);
@@ -113,20 +120,20 @@ export class User implements IUser {
         }
     }
 
-    addRole(type: RoleType) {
+    addRole(type: RoleType): void {
         if (!this.roles.find(rt => rt === type)) {
             this.roles.push(type);
         }
     }
 
-    removeRole(type: RoleType) {
+    removeRole(type: RoleType): void {
         const idx = this.roles.findIndex(rt => rt === type);
         if (idx > -1) {
             this.roles.splice(idx, 1);
         }
     }
 
-    static Fixture(data: IUser): User {
+    static Fixture(data: IUserData): User {
         const u = new User();
         u._id = data.id;
         u._strategy = data.strategy;
