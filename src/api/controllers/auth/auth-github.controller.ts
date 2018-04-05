@@ -13,9 +13,9 @@ import { OAuthBaseController } from './oauth-base.controller';
 export class AuthGithubController extends OAuthBaseController implements interfaces.Controller {
     constructor(
         @inject(TYPES.Environment) environment: IEnvironment,
-        @inject(TYPES.UserService) userService: IUserService
+        @inject(TYPES.UserService) userServiceFactory: (authStrategy: AuthStrategy) => IUserService,
     ) {
-        super(environment, userService, AuthStrategy.Github);
+        super(environment, userServiceFactory, AuthStrategy.Github);
         if (environment.githubClientId && environment.githubClientSecret) {
             passport.use(new github.Strategy({
                 clientID: environment.githubClientId,

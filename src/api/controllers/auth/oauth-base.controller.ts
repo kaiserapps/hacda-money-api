@@ -9,11 +9,13 @@ import { IUserService } from '../../../service/user/user.service.interface';
 
 @injectable()
 export abstract class OAuthBaseController implements interfaces.Controller {
+    protected userService: IUserService;
     constructor(
         @unmanaged() protected environment: IEnvironment,
-        @unmanaged() protected userService: IUserService,
+        @unmanaged() userServiceFactory: (authStrategy: AuthStrategy) => IUserService,
         @unmanaged() protected strategy: AuthStrategy
     ) {
+        this.userService = userServiceFactory(strategy);
         passport.serializeUser((user: User, done) => {
             done(null, user.email);
         });
@@ -37,7 +39,7 @@ export abstract class OAuthBaseController implements interfaces.Controller {
                 return user;
             }
             else {
-                return this.userService.registerOAuthUser(this.strategy, this.getEmail(profile), profile.displayName, profile)
+                return this.userService.registerUser(this.strategy, this.getEmail(profile), profile.displayName, profile)
                     .then(() => this.userService.findUser(this.strategy, this.getEmail(profile)));
             }
         });

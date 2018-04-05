@@ -13,9 +13,9 @@ import { OAuthBaseController } from './oauth-base.controller';
 export class AuthFacebookController extends OAuthBaseController implements interfaces.Controller {
     constructor(
         @inject(TYPES.Environment) environment: IEnvironment,
-        @inject(TYPES.UserService) userService: IUserService
+        @inject(TYPES.UserService) userServiceFactory: (authStrategy: AuthStrategy) => IUserService,
     ) {
-        super(environment, userService, AuthStrategy.Facebook);
+        super(environment, userServiceFactory, AuthStrategy.Facebook);
         if (environment.facebookClientId && environment.facebookClientSecret) {
             passport.use(new facebook.Strategy({
                 clientID: environment.facebookClientId,

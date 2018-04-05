@@ -28,6 +28,7 @@ export interface IUser extends IUserData {
     resetPassword(dateProvider: IDateProvider, token: string, password: IPassword): Promise<void>;
     addRole(type: RoleType): void;
     removeRole(type: RoleType): void;
+    addSession(token: string): void;
 }
 
 export class User implements IUser {
@@ -131,6 +132,13 @@ export class User implements IUser {
         if (idx > -1) {
             this.roles.splice(idx, 1);
         }
+    }
+
+    addSession(token: string): void {
+        if (!this.tokens) {
+            this.tokens = [];
+        }
+        this.tokens.push(token);
     }
 
     static Fixture(data: IUserData): User {

@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { Container } from 'inversify';
+import { Container, interfaces } from 'inversify';
 
 import { AuditMemoryRepository } from '../../domain/audit/audit.memory.repository';
 import { AuditMongoRepository } from '../../domain/audit/audit.mongo.repository';
@@ -10,6 +10,7 @@ import { UserMongoRepository } from '../../domain/user/user.mongo.repository';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
+import { AuthStrategy } from '../../providers/auth/enums';
 import { CryptoProvider } from '../../providers/crypto/crypto.provider';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
@@ -21,7 +22,8 @@ import { UserProvider } from '../../providers/user/user.provider';
 import { IUserProvider } from '../../providers/user/user.provider.interface';
 import { AuthService } from '../../service/auth/auth.service';
 import { IAuthService } from '../../service/auth/auth.service.interface';
-import { UserService } from '../../service/user/user.service';
+import { BasicUserService } from '../../service/user/basic-user.service';
+import { OAuthUserService } from '../../service/user/oauth-user.service';
 import { IUserService } from '../../service/user/user.service.interface';
 import { FacebookAuthMiddleware } from '../middleware/authentication/facebook-auth.middleware';
 import { GithubAuthMiddleware } from '../middleware/authentication/github-auth.middleware';
@@ -76,7 +78,28 @@ export class ContainerConfig {
         }
         // services
         container.bind<IAuthService>(TYPES.AuthService).to(AuthService).inRequestScope();
-        container.bind<IUserService>(TYPES.UserService).to(UserService).inRequestScope();
+        container.bind<interfaces.Factory<IUserService>>(TYPES.UserService).toFactory<IUserService>((context: interfaces.Context) => {
+            return (authStrategy: AuthStrategy) => {
+                switch (authStrategy) {
+                    case AuthStrategy.Basic:
+                        return new BasicUserService(
+                            context.container.get<IEnvironment>(TYPES.Environment),
+                            context.container.get<IUserRepository>(TYPES.UserRepository),
+                            context.container.get<ICryptoProvider>(TYPES.CryptoProvider),
+                            context.container.get<IDateProvider>(TYPES.DateProvider),
+                            context.container.get<IEmailProvider>(TYPES.EmailProvider)
+                        );
+                    default:
+                        return new OAuthUserService(
+                            context.container.get<IEnvironment>(TYPES.Environment),
+                            context.container.get<IUserRepository>(TYPES.UserRepository),
+                            context.container.get<ICryptoProvider>(TYPES.CryptoProvider),
+                            context.container.get<IDateProvider>(TYPES.DateProvider),
+                            context.container.get<IEmailProvider>(TYPES.EmailProvider)
+                        );
+                }
+            }
+        });
         return container;
     }
 }

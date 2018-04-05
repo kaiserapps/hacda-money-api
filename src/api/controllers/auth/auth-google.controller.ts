@@ -13,9 +13,9 @@ import { OAuthBaseController } from './oauth-base.controller';
 export class AuthGoogleController extends OAuthBaseController implements interfaces.Controller {
     constructor(
         @inject(TYPES.Environment) environment: IEnvironment,
-        @inject(TYPES.UserService) userService: IUserService
+        @inject(TYPES.UserService) userServiceFactory: (authStrategy: AuthStrategy) => IUserService,
     ) {
-        super(environment, userService, AuthStrategy.Google);
+        super(environment, userServiceFactory, AuthStrategy.Google);
         if (environment.googleClientId && environment.googleClientSecret) {
             passport.use(new google.Strategy({
                 clientID: environment.googleClientId,
