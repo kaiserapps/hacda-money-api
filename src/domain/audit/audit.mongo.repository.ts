@@ -20,7 +20,7 @@ export class AuditMongoRepository implements IAuditRepository {
         this.AuditModel = mongoose.model('Audit');
     }
 
-    createAudit(audit: Audit): Promise<void> {
+    async createAudit(audit: Audit): Promise<void> {
         audit.username = this.userProvider.user && this.userProvider.user.details ? this.userProvider.user.details.email : 'Anonymous';
         audit.timestamp = this.dateProvider.currentDateTicks;
         return new Promise<void>((resolve: any, reject: any) => {

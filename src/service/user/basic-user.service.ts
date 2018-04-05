@@ -37,7 +37,7 @@ export class BasicUserService extends UserService implements IUserService {
         await this.userRepository.createUser(user);
         const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
         await this.setPasswordResetTokenAndSendEmail(user, resetToken, this._httpProtocol, true);
-        return Promise.resolve(new UserResponse(user));
+        return new UserResponse(user);
     }
 
     async forgotPass(strategy: AuthStrategy, email: string, protocol: string): Promise<string> {
@@ -46,10 +46,10 @@ export class BasicUserService extends UserService implements IUserService {
             const expiration = this.environment.resetPassTokenExpiration || ONE_DAY_IN_SECONDS;
             const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
             await this.setPasswordResetTokenAndSendEmail(user, resetToken, protocol);
-            return Promise.resolve(resetToken);
+            return resetToken;
         }
         else {
-            return Promise.reject(`User ${email} not found.`);
+            throw new Error(`User ${email} not found.`);
         }
     }
 
@@ -59,11 +59,11 @@ export class BasicUserService extends UserService implements IUserService {
             return user.resetPassword(this.dateProvider, token, Password.create(this.cryptoProvider, password));
         }
         else {
-            return Promise.reject(`User ${email} not found.`);
+            throw new Error(`User ${email} not found.`);
         }
     }
 
-    private setPasswordResetTokenAndSendEmail(user: IUser, resetToken: string, protocol: string, isActivation?: boolean): Promise<IEmail> {
+    private async setPasswordResetTokenAndSendEmail(user: IUser, resetToken: string, protocol: string, isActivation?: boolean): Promise<IEmail> {
         const action = isActivation ? 'activate your account' : 'reset your password';
         const title = isActivation ? 'Active Account' : 'Reset Password';
         return this.emailProvider.sendEmail(

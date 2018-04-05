@@ -13,7 +13,7 @@ export class LocalEmailProvider implements IEmailProvider {
     ) {
     }
 
-    sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<IEmail> {
+    async sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<IEmail> {
         const msg = {
             to: email,
             from: '',

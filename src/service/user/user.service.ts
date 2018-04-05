@@ -21,21 +21,22 @@ export abstract class UserService implements IUserService {
 
     async registerUser(strategy: AuthStrategy, email: string, displayName: string, oAuthData?: any): Promise<UserResponse> {
         const user = await User.register(this.userRepository, strategy, email, displayName, oAuthData);
-        return this.userRepository.createUser(user).then(() => new UserResponse(user));
+        await this.userRepository.createUser(user);
+        return new UserResponse(user);
     }
 
     async addSession(strategy: AuthStrategy, email: string, token: string): Promise<void> {
         const user = await this.userRepository.getUser(strategy, email);
         if (user) {
             user.addSession(token);
-            return this.userRepository.saveUser(user);
+            await this.userRepository.saveUser(user);
         }
         else {
-            return Promise.reject(`User ${email} not found.`);
+            throw new Error(`User ${email} not found.`);
         }
     }
 
-    findUser(strategy: AuthStrategy, email: string): Promise<IUser | null> {
+    async findUser(strategy: AuthStrategy, email: string): Promise<IUser | null> {
         return this.userRepository.getUser(strategy, email);
     }
 

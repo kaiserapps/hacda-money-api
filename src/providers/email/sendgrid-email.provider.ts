@@ -12,7 +12,7 @@ export class SendGridEmailProvider implements IEmailProvider {
     ) {
     }
 
-    public sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<IEmail> {
+    async sendEmail(email: string, subject: string, body: string, templateId: string, substitutions?: any): Promise<IEmail> {
         if (!substitutions) {
             substitutions = {};
         }
@@ -28,8 +28,12 @@ export class SendGridEmailProvider implements IEmailProvider {
             templateId: sendGridTemplates[templateId],
             substitutions: substitutions
         };
-        return SendGrid.send(msg).then(() => {
-            return {...msg, body};
-        });
+        await SendGrid.send(msg);
+        return {
+            to: msg.to,
+            subject: msg.subject,
+            from: msg.from,
+            body: body
+        };
     }
 }

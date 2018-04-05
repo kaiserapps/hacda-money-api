@@ -15,7 +15,7 @@ export class OAuthJwtProvider extends JwtProvider implements IJwtProvider {
         super(userService, environment);
     }
 
-    validateToken(token: string): Promise<interfaces.Principal> {
+    async validateToken(token: string): Promise<interfaces.Principal> {
         return super.validateToken(token);
     }
 }

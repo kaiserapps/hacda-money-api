@@ -32,19 +32,19 @@ export class UserMemoryRepository implements IUserRepository {
         }));
     }
 
-    getUser(strategy: AuthStrategy, email: string): Promise<User | null> {
+    async getUser(strategy: AuthStrategy, email: string): Promise<User | null> {
         const user = this.database.users.find(x => x.strategy === strategy && x.email === email) || null;
         return Promise.resolve(user);
     }
 
-    createUser(user: User): Promise<void> {
+    async createUser(user: User): Promise<void> {
         user._id = uuid4();
         this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Create, user));
         this.database.users.push(user);
         return Promise.resolve();
     }
 
-    saveUser(user: User): Promise<void> {
+    async saveUser(user: User): Promise<void> {
         const idx = this.database.users.findIndex(x => x._id === user._id);
         if (idx < 0) {
             return Promise.reject(`User with email address ${user.email} not found!`);

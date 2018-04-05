@@ -13,15 +13,15 @@ export class UnauthenticatedPrincipal implements interfaces.Principal {
         this._details = details;
     }
 
-    public isAuthenticated(): Promise<boolean> {
+    async isAuthenticated(): Promise<boolean> {
         return Promise.resolve(false);
     }
 
-    public isResourceOwner(resourceId: any): Promise<boolean> {
+    async isResourceOwner(resourceId: any): Promise<boolean> {
         return Promise.resolve(false);
     }
 
-    public isInRole(role: string): Promise<boolean> {
+    async isInRole(role: string): Promise<boolean> {
         return Promise.resolve(false);
     }
 }

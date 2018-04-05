@@ -13,13 +13,12 @@ import { OAuthJwtProvider } from './oauth-jwt.provider';
 import { UnauthenticatedPrincipal } from './unauthenticated-principal';
 
 export class JwtStatic {
-    static getJwtProviderByToken(token: string, environment: IEnvironment, userService: IUserService): Promise<IJwtProvider | null> {
-        return JwtStatic.verifyToken(environment.jwt, token).then(data => {
-            return JwtStatic.getJwtProvider(data.strategy, environment, userService);
-        });
+    static async getJwtProviderByToken(token: string, environment: IEnvironment, userService: IUserService): Promise<IJwtProvider | null> {
+        const data = await JwtStatic.verifyToken(environment.jwt, token);
+        return JwtStatic.getJwtProvider(data.strategy, environment, userService);
     }
 
-    static getJwtProvider(strategy: AuthStrategy, environment: IEnvironment, userService: IUserService): Promise<IJwtProvider | null> {
+    static getJwtProvider(strategy: AuthStrategy, environment: IEnvironment, userService: IUserService): IJwtProvider | null {
         let jwtProvider: IJwtProvider | null = null;
         switch (strategy) {
             case AuthStrategy.Basic:
@@ -35,10 +34,10 @@ export class JwtStatic {
                 jwtProvider = new OAuthJwtProvider(userService, environment, environment.googleClientId || '', environment.googleClientSecret || '');
                 break;
         }
-        return Promise.resolve(jwtProvider);
+        return jwtProvider;
     }
 
-    static verifyToken(jwtSettings: any, token: string): Promise<any> {
+    static async verifyToken(jwtSettings: any, token: string): Promise<any> {
         const cert = fs.readFileSync(jwtSettings.publicKeyPath || '');
 
         return new Promise<any>((resolve, reject) => {
@@ -46,7 +45,7 @@ export class JwtStatic {
                 algorithms: ['RS256'],
                 audience: jwtSettings.audience,
                 issuer: jwtSettings.issuer
-            }, function(err, decoded) {
+            }, (err, decoded) => {
                 if (err) {
                     reject(err);
                 }

@@ -27,32 +27,38 @@ export class AuthBasicController implements interfaces.Controller {
     }
 
     @httpGet('/login')
-    public async login(
+    async login(
         @request() req: express.Request,
         @response() res: express.Response
     ) {
         const credentials = auth(req);
-        if (credentials) {
-            return await this._userService.findUser(AuthStrategy.Basic, credentials.name).then(user => {
-                if (user && user.password.verify(this.cryptoProvider, credentials.pass)) {
-                    return this.authService.login(user);
-                }
-                else {
-                    return Promise.reject('User credentials invalid.');
-                }
-            }).then(token => {
-                return {
-                    jwt: token
-                };
-            }).catch(err => this.sendBasicAuthChallenge(res, err));
-        }
-        else {
+        if (!credentials) {
             this.sendBasicAuthChallenge(res, 'User credentials not provided.');
+            return;
+        }
+
+        try {
+            const user = await this._userService.findUser(AuthStrategy.Basic, credentials.name);
+            let token: string;
+            if (user && user.password.verify(this.cryptoProvider, credentials.pass)) {
+                token = await this.authService.login(user);
+            }
+            else {
+                throw new Error('User credentials invalid.');
+            }
+
+            return {
+                jwt: token
+            };
+        }
+        catch (err) {
+            this.sendBasicAuthChallenge(res, err);
+            return;
         }
     }
 
     @httpPost('/register')
-    public register(
+    async register(
         @request() req: express.Request,
         @response() res: express.Response
     ): Promise<UserResponse> {
@@ -61,19 +67,19 @@ export class AuthBasicController implements interfaces.Controller {
     }
 
     @httpPost('/forgotpass')
-    public forgotpass(
+    async forgotpass(
         @request() req: express.Request,
         @response() res: express.Response
-    ): any {
+    ): Promise<string> {
         return this._userService.forgotPass(AuthStrategy.Basic, req.body.email, req.protocol);
     }
 
     @httpPost('/resetpass/:token')
-    public resetpass(
+    async resetpass(
         @requestParam('token') token: string,
         @request() req: express.Request,
         @response() res: express.Response
-    ): any {
+    ): Promise<void> {
         return this._userService.resetPass(AuthStrategy.Basic, req.body.email, token, req.body.password);
     }
 

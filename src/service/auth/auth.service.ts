@@ -17,37 +17,33 @@ export class AuthService implements IAuthService {
         @inject(TYPES.UserProvider) private userProvider: IUserProvider
     ) { }
 
-    public checkToken(token: string): Promise<IUser> {
+    async checkToken(token: string): Promise<IUser> {
         if (!token) {
             return Promise.reject(`Token is required.`);
         }
-        return JwtStatic.getJwtProviderByToken(token, this.environment, this.userService).then(provider => {
-            if (!provider) {
-                throw new Error(`Provider for bearer token not found.`);
-            }
-            return provider.validateToken(token).then(principal => {
-                const typedPrincipal = principal as JwtPrincipal;
-                return this.userService.findUser(typedPrincipal.details.strategy, typedPrincipal.details.email).then(user => {
-                    if (user && user.tokens && user.tokens.indexOf(token) > -1) {
-                        this.userProvider.user = typedPrincipal;
-                        return typedPrincipal.details;
-                    }
-                    else {
-                        throw new Error(`Authorization token is invalid.`);
-                    }
-                });
-            });
-        });
+        const provider = await JwtStatic.getJwtProviderByToken(token, this.environment, this.userService);
+        if (!provider) {
+            throw new Error(`Provider for bearer token not found.`);
+        }
+        const principal = await provider.validateToken(token);
+        const typedPrincipal = principal as JwtPrincipal;
+        const user = await this.userService.findUser(typedPrincipal.details.strategy, typedPrincipal.details.email);
+        if (user && user.tokens && user.tokens.indexOf(token) > -1) {
+            this.userProvider.user = typedPrincipal;
+            return typedPrincipal.details;
+        }
+        else {
+            throw new Error(`Authorization token is invalid.`);
+        }
     }
 
-    public login(user: User): Promise<string> {
-        return JwtStatic.getJwtProvider(user.strategy, this.environment, this.userService).then(provider => {
-            if (provider) {
-                return provider.generateToken(user);
-            }
-            else {
-                return Promise.reject(`JWT Provider not found for strategy ${user.strategy}!`);
-            }
-        });
+    async login(user: User): Promise<string> {
+        const provider = await JwtStatic.getJwtProvider(user.strategy, this.environment, this.userService);
+        if (provider) {
+            return provider.generateToken(user);
+        }
+        else {
+            throw new Error(`JWT Provider not found for strategy ${user.strategy}!`);
+        }
     }
 }

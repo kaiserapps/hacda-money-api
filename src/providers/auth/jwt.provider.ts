@@ -20,14 +20,21 @@ export abstract class JwtProvider implements IJwtProvider {
         this.jwt = environment.jwt;
     }
 
-    validateToken(token: string): Promise<interfaces.Principal> {
-        return JwtStatic.verifyToken(this.jwt, token).then(decoded => {
+    async validateToken(token: string): Promise<interfaces.Principal> {
+        try {
+            const decoded = await JwtStatic.verifyToken(this.jwt, token);
             return new JwtPrincipal(decoded);
-        }).catch(err => new UnauthenticatedPrincipal(err));
+        }
+        catch (err) {
+            return new UnauthenticatedPrincipal(err);
+        }
     }
 
-    generateToken(user: User): Promise<string> {
-        const cert = fs.readFileSync(this.jwt.privateKeyPath || '');
+    async generateToken(user: User): Promise<string> {
+        // Get the secret key file contents
+        const cert = fs.readFileSync(this.jwt.privateKeyPath || '') as jwt.Secret;
+
+        // Assign claims
         const data = {
             strategy: user.strategy,
             strategyName: AuthStrategy[user.strategy],
@@ -36,24 +43,29 @@ export abstract class JwtProvider implements IJwtProvider {
             name: user.displayName,
             profile: (user.oAuthData || {}).profile_url
         };
-        return new Promise<string>((resolve, reject) => {
-            const that = this;
-            jwt.sign(data, cert, {
-                algorithm: 'RS256',
-                expiresIn: that.jwt.tokenExpiration,
-                audience: that.jwt.audiences,
-                issuer: that.jwt.issuer,
-                subject: user.email,
-            }, (err, token) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    this.userService.addSession(user.strategy, user.email, token).then(() => {
-                        resolve(token);
-                    });
-                }
+
+        // More claims as JWT options
+        const opts: jwt.SignOptions = {
+            algorithm: 'RS256',
+            expiresIn: this.jwt.tokenExpiration,
+            audience: this.jwt.audiences,
+            issuer: this.jwt.issuer,
+            subject: user.email,
+        }
+
+        // Set up the async signing function
+        const signJwt = async (payload: any, secret: jwt.Secret, options: jwt.SignOptions) => {
+            return new Promise<string>((resolve, reject) => {
+                const that = this;
+                jwt.sign(payload, cert, opts, (err, token) => {
+                    err ? reject(err) : resolve(token);
+                });
             });
-        });
+        };
+
+        // Generate the JWT and add it to the user's session
+        const tkn = await signJwt(data, cert, opts);
+        await this.userService.addSession(user.strategy, user.email, tkn);
+        return tkn;
     }
 }

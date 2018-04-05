@@ -20,7 +20,7 @@ export class UserMongoRepository implements IUserRepository {
         this.UserModel = mongoose.model('User');
     }
 
-    getUser(strategy: AuthStrategy, email: string): Promise<User | null> {
+    async getUser(strategy: AuthStrategy, email: string): Promise<User | null> {
         return new Promise<User>((resolve: any, reject: any) => {
             this.UserModel.find({
                 strategy: strategy,
@@ -36,7 +36,7 @@ export class UserMongoRepository implements IUserRepository {
         });
     }
 
-    createUser(user: User): Promise<void> {
+    async createUser(user: User): Promise<void> {
         this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Create, user));
         return new Promise<void>((resolve: any, reject: any) => {
             const newUser = new this.UserModel(user);
@@ -51,7 +51,7 @@ export class UserMongoRepository implements IUserRepository {
         });
     }
 
-    saveUser(user: User): Promise<void> {
+    async saveUser(user: User): Promise<void> {
         this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Update, user));
         return new Promise<void>((resolve: any, reject: any) => {
             this.UserModel.findByIdAndUpdate(user._id, user, (err: any) => {

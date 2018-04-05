@@ -17,7 +17,7 @@ export class AuditMemoryRepository implements IAuditRepository {
     ) {
     }
 
-    createAudit(audit: Audit): Promise<void> {
+    async createAudit(audit: Audit): Promise<void> {
         audit._id = uuid4();
         audit.username = this.userProvider.user && this.userProvider.user.details ? this.userProvider.user.details.email : 'Anonymous';
         audit.timestamp = this.dateProvider.currentDateTicks;

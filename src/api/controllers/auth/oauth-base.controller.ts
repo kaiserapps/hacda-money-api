@@ -20,29 +20,37 @@ export abstract class OAuthBaseController implements interfaces.Controller {
             done(null, user.email);
         });
 
-        passport.deserializeUser((id: string, done) => {
-            this.userService.findUser(this.strategy, id)
-                .then(user => {
-                    user ? done(null, user) : done(`User ${id} not found`);
-                })
-                .catch(err => done(err));
+        passport.deserializeUser(async (id: string, done) => {
+            try {
+                const user = await this.userService.findUser(this.strategy, id);
+                if (user) {
+                    done(null, user);
+                }
+                else {
+                    done(`User ${id} not found`);
+                }
+            }
+            catch (err) {
+                done(err);
+            }
         });
     }
 
-    protected verify(
+    protected async verify(
         accessToken: string,
         refreshToken: string,
         profile: any
     ): Promise<IUser | null> {
-        return this.userService.findUser(this.strategy, this.getEmail(profile)).then(user => {
-            if (user) {
-                return user;
+        let user: IUser | null = null;
+        let attempts = 1;
+        while (!user && attempts < 2) {
+            user = await this.userService.findUser(this.strategy, this.getEmail(profile));
+            if (!user) {
+                await this.userService.registerUser(this.strategy, this.getEmail(profile), profile.displayName, profile);
             }
-            else {
-                return this.userService.registerUser(this.strategy, this.getEmail(profile), profile.displayName, profile)
-                    .then(() => this.userService.findUser(this.strategy, this.getEmail(profile)));
-            }
-        });
+            attempts++;
+        }
+        return user;
     }
 
     protected getEmail(profile: any): string {

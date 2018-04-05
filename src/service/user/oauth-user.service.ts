@@ -29,10 +29,10 @@ export class OAuthUserService extends UserService implements IUserService {
     }
 
     forgotPass(strategy: AuthStrategy, email: string, protocol: string): Promise<string> {
-        return Promise.reject('Method "forgotPass" not applicable to oauth');
+        throw new Error('Method "forgotPass" not applicable to oauth');
     }
 
     resetPass(strategy: AuthStrategy, email: string, token: string, password: string): Promise<void> {
-        return Promise.reject('Method "resetPass" not applicable to oauth');
+        throw new Error('Method "resetPass" not applicable to oauth');
     }
 }

@@ -25,7 +25,7 @@ export interface IUserData {
 
 export interface IUser extends IUserData {
     initiatePasswordReset(dateProvider: IDateProvider, environment: IEnvironment): string;
-    resetPassword(dateProvider: IDateProvider, token: string, password: IPassword): Promise<void>;
+    resetPassword(dateProvider: IDateProvider, token: string, password: IPassword): void;
     addRole(type: RoleType): void;
     removeRole(type: RoleType): void;
     addSession(token: string): void;
@@ -81,26 +81,25 @@ export class User implements IUser {
         this.roles = [];
     }
 
-    static register(
+    static async register(
         userRepository: IUserRepository,
         strategy: AuthStrategy,
         email: string,
         displayName: string,
         oAuthData?: any
     ): Promise<IUser> {
-        return userRepository.getUser(strategy, email).then(existingUser => {
-            if (!!existingUser) {
-                throw new Error(`User with email ${email} already exists.`);
-            }
-            else {
-                const user = new User();
-                user._strategy = strategy;
-                user._email = email;
-                user._displayName = displayName;
-                user.oAuthData = oAuthData;
-                return user;
-            }
-        });
+        const existingUser = userRepository.getUser(strategy, email);
+        if (!!existingUser) {
+            throw new Error(`User with email ${email} already exists.`);
+        }
+        else {
+            const user = new User();
+            user._strategy = strategy;
+            user._email = email;
+            user._displayName = displayName;
+            user.oAuthData = oAuthData;
+            return user;
+        }
     }
 
     initiatePasswordReset(dateProvider: IDateProvider, environment: IEnvironment): string {
@@ -110,14 +109,13 @@ export class User implements IUser {
         return this._resetToken;
     }
 
-    resetPassword(dateProvider: IDateProvider, token: string, password: IPassword): Promise<void> {
+    resetPassword(dateProvider: IDateProvider, token: string, password: IPassword): void {
         if (token === this._resetToken &&
             dateProvider.currentDateTicks > (this._resetTokenExpirationDate || 0)) {
             this._password = password;
-            return Promise.resolve();
         }
         else {
-            return Promise.reject('Reset token incorrect or expired.');
+            throw new Error('Reset token incorrect or expired.');
         }
     }
 
