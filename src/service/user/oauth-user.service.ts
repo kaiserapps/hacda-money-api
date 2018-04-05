@@ -1,18 +1,14 @@
 import { inject, injectable } from 'inversify';
 
-import { Password } from '../../domain/user/password';
-import { User, IUser } from '../../domain/user/user';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
-import { ONE_DAY_IN_SECONDS } from '../../global-const';
 import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { IEmail, IEmailProvider } from '../../providers/email/email.provider.interface';
-import { UserResponse } from './user-response';
-import { IUserService } from './user.service.interface';
+import { IEmailProvider } from '../../providers/email/email.provider.interface';
 import { UserService } from './user.service';
+import { IUserService } from './user.service.interface';
 
 @injectable()
 export class OAuthUserService extends UserService implements IUserService {
