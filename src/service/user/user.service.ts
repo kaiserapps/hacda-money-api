@@ -19,22 +19,20 @@ export abstract class UserService implements IUserService {
         @unmanaged() protected dateProvider: IDateProvider,
     ) { }
 
-    registerUser(strategy: AuthStrategy, email: string, displayName: string, oAuthData?: any): Promise<UserResponse> {
-        return User.register(this.userRepository, strategy, email, displayName, oAuthData).then(user => {
-            return this.userRepository.createUser(user).then(() => new UserResponse(user));
-        });
+    async registerUser(strategy: AuthStrategy, email: string, displayName: string, oAuthData?: any): Promise<UserResponse> {
+        const user = await User.register(this.userRepository, strategy, email, displayName, oAuthData);
+        return this.userRepository.createUser(user).then(() => new UserResponse(user));
     }
 
-    addSession(strategy: AuthStrategy, email: string, token: string): Promise<void> {
-        return this.userRepository.getUser(strategy, email).then(user => {
-            if (user) {
-                user.addSession(token);
-                return this.userRepository.saveUser(user);
-            }
-            else {
-                return Promise.reject(`User ${email} not found.`);
-            }
-        });
+    async addSession(strategy: AuthStrategy, email: string, token: string): Promise<void> {
+        const user = await this.userRepository.getUser(strategy, email);
+        if (user) {
+            user.addSession(token);
+            return this.userRepository.saveUser(user);
+        }
+        else {
+            return Promise.reject(`User ${email} not found.`);
+        }
     }
 
     findUser(strategy: AuthStrategy, email: string): Promise<IUser | null> {

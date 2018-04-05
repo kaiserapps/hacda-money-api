@@ -32,38 +32,35 @@ export class BasicUserService extends UserService implements IUserService {
         super(environment, userRepository, cryptoProvider, dateProvider);
     }
 
-    registerUser(strategy: AuthStrategy, email: string, displayName: string): Promise<UserResponse> {
-        return User.register(this.userRepository, strategy, email, displayName).then(user => {
-            return this.userRepository.createUser(user).then(() => {
-                const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
-                return this.setPasswordResetTokenAndSendEmail(user, resetToken, this._httpProtocol, true)
-                    .then(() => new UserResponse(user));
-            });
-        });
+    async registerUser(strategy: AuthStrategy, email: string, displayName: string): Promise<UserResponse> {
+        const user = await User.register(this.userRepository, strategy, email, displayName);
+        await this.userRepository.createUser(user);
+        const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
+        await this.setPasswordResetTokenAndSendEmail(user, resetToken, this._httpProtocol, true);
+        return Promise.resolve(new UserResponse(user));
     }
 
-    forgotPass(strategy: AuthStrategy, email: string, protocol: string): Promise<string> {
-        return this.userRepository.getUser(strategy, email).then(user => {
-            if (user) {
-                const expiration = this.environment.resetPassTokenExpiration || ONE_DAY_IN_SECONDS;
-                const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
-                return this.setPasswordResetTokenAndSendEmail(user, resetToken, protocol).then(() => resetToken);
-            }
-            else {
-                return Promise.reject(`User ${email} not found.`);
-            }
-        });
+    async forgotPass(strategy: AuthStrategy, email: string, protocol: string): Promise<string> {
+        const user = await this.userRepository.getUser(strategy, email);
+        if (user) {
+            const expiration = this.environment.resetPassTokenExpiration || ONE_DAY_IN_SECONDS;
+            const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
+            await this.setPasswordResetTokenAndSendEmail(user, resetToken, protocol);
+            return Promise.resolve(resetToken);
+        }
+        else {
+            return Promise.reject(`User ${email} not found.`);
+        }
     }
 
-    resetPass(strategy: AuthStrategy, email: string, token: string, password: string): Promise<void> {
-        return this.userRepository.getUser(strategy, email).then(user => {
-            if (user) {
-                return user.resetPassword(this.dateProvider, token, Password.create(this.cryptoProvider, password));
-            }
-            else {
-                return Promise.reject(`User ${email} not found.`);
-            }
-        });
+    async resetPass(strategy: AuthStrategy, email: string, token: string, password: string): Promise<void> {
+        const user = await this.userRepository.getUser(strategy, email);
+        if (user) {
+            return user.resetPassword(this.dateProvider, token, Password.create(this.cryptoProvider, password));
+        }
+        else {
+            return Promise.reject(`User ${email} not found.`);
+        }
     }
 
     private setPasswordResetTokenAndSendEmail(user: IUser, resetToken: string, protocol: string, isActivation?: boolean): Promise<IEmail> {
