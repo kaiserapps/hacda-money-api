@@ -8,9 +8,7 @@ import { IEnvironment } from '../../environments/env.interface';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { IEmailProvider } from '../../providers/email/email.provider.interface';
 import { BasicUserService } from './basic-user.service';
-import { IUserService } from './user.service.interface';
 import { IUserPasswordService } from './user-password.service.interface';
 
 const Mock = TypeMoq.Mock;
@@ -32,27 +30,28 @@ describe('user service', () => {
         passSvc = Mock.ofType<IUserPasswordService>();
     });
 
-    describe('adding session', () => {
+    describe('register basic', () => {
 
-        it('pushes a new token on successful retrieve of user', async done => {
+        it('creates user on repository', async done => {
             // Arrange
             const userService = new BasicUserService(env.object, userRepo.object, cryptoProv.object, dateProv.object, passSvc.object);
-            const mockUser = Mock.ofType<IUser>();
-            mockUser.setup((x: any) => x.then).returns(() => undefined);
-            mockUser.setup(x => x.addSession(It.isAnyString())).verifiable();
-            userRepo.setup(x => x.getUser(It.isAnyNumber(), It.isAnyString())).returns(() => Promise.resolve(mockUser.object)).verifiable();
-            userRepo.setup(x => x.saveUser(It.isAnyObject<User>(User))).returns(() => Promise.resolve()).verifiable();
+            const user = User.Fixture({
+                id: uuid4(),
+                strategy: AuthStrategy.Basic,
+                email: 'test@test.com',
+                displayName: 'Test User',
+                password: new NullPassword()
+            });
+            userRepo.setup(x => x.initUser(It.isAnyNumber(), It.isAnyString(), It.isAnyString(), It.isAny())).returns(() => Promise.resolve(user)).verifiable();
+            userRepo.setup(x => x.createUser(It.isAnyObject<User>(User))).returns(() => Promise.resolve()).verifiable();
+            userRepo.setup(x => x.getUser(It.isAnyNumber(), It.isAnyString())).returns(() => Promise.resolve(null)).verifiable();
 
             try {
                 // Act
-                const token = 'testtoken';
-                const email = 'test@test.com';
-                await userService.addSession(AuthStrategy.Basic, email, token);
+                await userService.registerUser(AuthStrategy.Basic, 'test@test.com', 'Test User');
 
                 // Assert
-                userRepo.verify(x => x.getUser(AuthStrategy.Basic, email), Times.once());
-                mockUser.verify(x => x.addSession(token), Times.once());
-                userRepo.verify(x => x.saveUser(mockUser.object), Times.once());
+                userRepo.verify(x => x.createUser(user), Times.once());
                 done();
             }
             catch (err) {
@@ -60,26 +59,33 @@ describe('user service', () => {
             }
         });
 
-        it('does not create user if registration failed', async done => {
+        it('sends password reset email', async done => {
             // Arrange
             const userService = new BasicUserService(env.object, userRepo.object, cryptoProv.object, dateProv.object, passSvc.object);
-            const anyUser = It.isAnyObject<User>(User);
-            const expectedError = 'initUserError';
-            userRepo.setup(x => x.initUser(It.isAnyNumber(), It.isAnyString(), It.isAnyString(), It.isAny())).returns(() => Promise.reject(expectedError)).verifiable();
-            userRepo.setup(x => x.createUser(anyUser)).returns(() => Promise.resolve()).verifiable();
+            const user = User.Fixture({
+                id: uuid4(),
+                strategy: AuthStrategy.Basic,
+                email: 'test@test.com',
+                displayName: 'Test User',
+                password: new NullPassword()
+            });
+            userRepo.setup(x => x.initUser(It.isAnyNumber(), It.isAnyString(), It.isAnyString(), It.isAny())).returns(() => Promise.resolve(user)).verifiable();
+            userRepo.setup(x => x.createUser(It.isAnyObject<User>(User))).returns(() => Promise.resolve()).verifiable();
+            userRepo.setup(x => x.getUser(It.isAnyNumber(), It.isAnyString())).returns(() => Promise.resolve(null)).verifiable();
+            const testToken = 'testtoken';
+            passSvc.setup(x => x.resetPassword(It.isAnyObject<User>(User), It.isAny())).returns(() => Promise.resolve(testToken)).verifiable();
 
             try {
                 // Act
                 await userService.registerUser(AuthStrategy.Basic, 'test@test.com', 'Test User');
-                fail('unexpected promise resolve');
+
+                // Assert
+                passSvc.verify(x => x.resetPassword(user, true), Times.once());
                 done();
             }
             catch (err) {
-                // Assert
-                userRepo.verify(x => x.createUser(anyUser), Times.never());
-                expect(err).toEqual(expectedError);
-                done();
-            };
+                fail(err);
+            }
         });
     });
 });

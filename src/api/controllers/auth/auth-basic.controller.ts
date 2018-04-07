@@ -11,6 +11,7 @@ import { IAuthService } from '../../../service/auth/auth.service.interface';
 import { UserResponse } from '../../../service/user/user-response';
 import { IUserService } from '../../../service/user/user.service.interface';
 import { BasicUserService } from '../../../service/user/basic-user.service';
+import { IUserPasswordService } from '../../../service/user/user-password.service.interface';
 
 @controller('/auth/basic')
 export class AuthBasicController implements interfaces.Controller {
@@ -20,6 +21,7 @@ export class AuthBasicController implements interfaces.Controller {
         @inject(TYPES.Environment) private environment: IEnvironment,
         @inject(TYPES.AuthService) private authService: IAuthService,
         @inject(TYPES.UserService) private userServiceFactory: (authStrategy: AuthStrategy) => IUserService,
+        @inject(TYPES.UserPasswordService) private passwordService: IUserPasswordService,
         @inject(TYPES.CryptoProvider) private cryptoProvider: ICryptoProvider
     ) {
         this._jwtSettings = environment.jwt || {};
@@ -62,7 +64,7 @@ export class AuthBasicController implements interfaces.Controller {
         @request() req: express.Request,
         @response() res: express.Response
     ): Promise<UserResponse> {
-        (this._userService as BasicUserService).httpProtocol = req.protocol;
+        this.passwordService.httpProtocol = req.protocol;
         return this._userService.registerUser(AuthStrategy.Basic, req.body.email, req.body.displayName);
     }
 
@@ -71,6 +73,7 @@ export class AuthBasicController implements interfaces.Controller {
         @request() req: express.Request,
         @response() res: express.Response
     ): Promise<string> {
+        this.passwordService.httpProtocol = req.protocol;
         return this._userService.forgotPass(AuthStrategy.Basic, req.body.email, req.protocol);
     }
 

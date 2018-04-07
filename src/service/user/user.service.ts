@@ -16,12 +16,11 @@ export abstract class UserService implements IUserService {
         @unmanaged() public environment: IEnvironment,
         @unmanaged() protected userRepository: IUserRepository,
         @unmanaged() protected cryptoProvider: ICryptoProvider,
-        @unmanaged() protected dateProvider: IDateProvider,
+        @unmanaged() protected dateProvider: IDateProvider
     ) { }
 
     async registerUser(strategy: AuthStrategy, email: string, displayName: string, oAuthData?: any): Promise<UserResponse> {
-        const user = await User.register(this.userRepository, strategy, email, displayName, oAuthData);
-        await this.userRepository.createUser(user);
+        const user = await this.initAndCreateUser(strategy, email, displayName, oAuthData);
         return new UserResponse(user);
     }
 
@@ -43,4 +42,10 @@ export abstract class UserService implements IUserService {
     abstract forgotPass(strategy: AuthStrategy, email: string, protocol: string): Promise<string>;
 
     abstract resetPass(strategy: AuthStrategy, email: string, token: string, password: string): Promise<void>;
+
+    protected async initAndCreateUser(strategy: AuthStrategy, email: string, displayName: string, oAuthData?: any): Promise<IUser> {
+        const user = await this.userRepository.initUser(strategy, email, displayName, oAuthData);
+        await this.userRepository.createUser(user);
+        return user;
+    }
 }

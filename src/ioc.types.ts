@@ -22,4 +22,5 @@ export const TYPES = {
     // services
     AuthService: Symbol('AuthService'),
     UserService: Symbol('UserService'),
+    UserPasswordService: Symbol('UserPasswordService')
 }

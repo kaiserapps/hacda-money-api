@@ -8,15 +8,17 @@ import { Audit } from '../audit/audit';
 import { IAuditRepository } from '../audit/audit.repository.interface';
 import { AuditClasses, AuditType } from '../audit/enums';
 import { User } from './user';
+import { UserRepository } from './user.repository';
 import { IUserRepository } from './user.repository.interface';
 
 @injectable()
-export class UserMongoRepository implements IUserRepository {
+export class UserMongoRepository extends UserRepository implements IUserRepository {
     UserModel: mongoose.Model<any>;
 
     constructor(
         @inject(TYPES.AuditRepository) public auditRepository: IAuditRepository
     ) {
+        super();
         this.UserModel = mongoose.model('User');
     }
 

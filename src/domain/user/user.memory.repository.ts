@@ -11,15 +11,17 @@ import { InMemoryDb } from '../in-memory.db';
 import { RoleType } from './enums';
 import { Password } from './password';
 import { User } from './user';
+import { UserRepository } from './user.repository';
 import { IUserRepository } from './user.repository.interface';
 
 @injectable()
-export class UserMemoryRepository implements IUserRepository {
+export class UserMemoryRepository extends UserRepository implements IUserRepository {
     constructor(
         @inject(TYPES.InMemoryDb) private database: InMemoryDb,
         @inject(TYPES.CryptoProvider) private cryptoProvider: ICryptoProvider,
         @inject(TYPES.AuditRepository) public auditRepository: IAuditRepository
     ) {
+        super();
         this.createUser(User.Fixture({
             id: uuid4(),
             strategy: AuthStrategy.Basic,

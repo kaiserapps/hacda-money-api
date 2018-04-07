@@ -24,6 +24,8 @@ import { AuthService } from '../../service/auth/auth.service';
 import { IAuthService } from '../../service/auth/auth.service.interface';
 import { BasicUserService } from '../../service/user/basic-user.service';
 import { OAuthUserService } from '../../service/user/oauth-user.service';
+import { UserPasswordService } from '../../service/user/user-password.service';
+import { IUserPasswordService } from '../../service/user/user-password.service.interface';
 import { IUserService } from '../../service/user/user.service.interface';
 import { FacebookAuthMiddleware } from '../middleware/authentication/facebook-auth.middleware';
 import { GithubAuthMiddleware } from '../middleware/authentication/github-auth.middleware';
@@ -87,19 +89,19 @@ export class ContainerConfig {
                             context.container.get<IUserRepository>(TYPES.UserRepository),
                             context.container.get<ICryptoProvider>(TYPES.CryptoProvider),
                             context.container.get<IDateProvider>(TYPES.DateProvider),
-                            context.container.get<IEmailProvider>(TYPES.EmailProvider)
+                            context.container.get<IUserPasswordService>(TYPES.UserPasswordService)
                         );
                     default:
                         return new OAuthUserService(
                             context.container.get<IEnvironment>(TYPES.Environment),
                             context.container.get<IUserRepository>(TYPES.UserRepository),
                             context.container.get<ICryptoProvider>(TYPES.CryptoProvider),
-                            context.container.get<IDateProvider>(TYPES.DateProvider),
-                            context.container.get<IEmailProvider>(TYPES.EmailProvider)
+                            context.container.get<IDateProvider>(TYPES.DateProvider)
                         );
                 }
             }
         });
+        container.bind<IUserPasswordService>(TYPES.UserPasswordService).to(UserPasswordService).inRequestScope();
         return container;
     }
 }

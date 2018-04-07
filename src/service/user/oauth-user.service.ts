@@ -22,8 +22,7 @@ export class OAuthUserService extends UserService implements IUserService {
         @inject(TYPES.Environment) environment: IEnvironment,
         @inject(TYPES.UserRepository) userRepository: IUserRepository,
         @inject(TYPES.CryptoProvider) cryptoProvider: ICryptoProvider,
-        @inject(TYPES.DateProvider) dateProvider: IDateProvider,
-        @inject(TYPES.EmailProvider) private emailProvider: IEmailProvider,
+        @inject(TYPES.DateProvider) dateProvider: IDateProvider
     ) {
         super(environment, userRepository, cryptoProvider, dateProvider);
     }

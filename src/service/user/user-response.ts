@@ -23,7 +23,7 @@ export class UserResponse {
         this.email = user.email;
         this.displayName = user.displayName;
         this.resetToken = user.resetToken;
-        this.roles = user.roles ? user.roles.map(v => {
+        this.roles = user.roles && user.roles.map !== undefined ? user.roles.map(v => {
             return {
                 id: v,
                 name: RoleType[v]

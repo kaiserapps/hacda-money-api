@@ -3,10 +3,9 @@ import * as uuid from 'uuid/v4';
 import { IEnvironment } from '../../environments/env.interface';
 import { ONE_DAY_IN_SECONDS } from '../../global-const';
 import { AuthStrategy } from '../../providers/auth/enums';
-import { IPassword } from './password';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
 import { RoleType } from './enums';
-import { NullPassword } from './password';
+import { IPassword, NullPassword } from './password';
 import { IUserRepository } from './user.repository.interface';
 
 export interface IUserData {
@@ -88,7 +87,7 @@ export class User implements IUser {
         displayName: string,
         oAuthData?: any
     ): Promise<IUser> {
-        const existingUser = userRepository.getUser(strategy, email);
+        const existingUser = await userRepository.getUser(strategy, email);
         if (!!existingUser) {
             throw new Error(`User with email ${email} already exists.`);
         }
