@@ -56,6 +56,7 @@ describe('user service', () => {
             }
             catch (err) {
                 fail(err);
+                done();
             }
         });
 
@@ -85,6 +86,7 @@ describe('user service', () => {
             }
             catch (err) {
                 fail(err);
+                done();
             }
         });
     });

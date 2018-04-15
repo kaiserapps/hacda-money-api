@@ -25,7 +25,7 @@ export class UserPasswordService implements IUserPasswordService {
     async resetPassword(user: IUser, isActivation?: boolean): Promise<string> {
         const resetToken = user.initiatePasswordReset(this.dateProvider, this.environment);
         const action = isActivation ? 'activate your account' : 'reset your password';
-        const title = isActivation ? 'Active Account' : 'Reset Password';
+        const title = isActivation ? 'Activate Account' : 'Reset Password';
         await this.emailProvider.sendEmail(
             user.email,
             title,

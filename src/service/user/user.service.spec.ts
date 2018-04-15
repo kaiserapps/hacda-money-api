@@ -78,6 +78,7 @@ describe('user service', () => {
             }
             catch (err) {
                 fail(err);
+                done();
             }
         });
     });
