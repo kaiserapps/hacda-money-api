@@ -1,4 +1,4 @@
-import SendGrid = require('@sendgrid/mail');
+import * as SendGrid from '@sendgrid/mail';
 import { inject, injectable } from 'inversify';
 
 import { IEnvironment } from '../../environments/env.interface';

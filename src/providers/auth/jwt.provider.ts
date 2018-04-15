@@ -3,9 +3,9 @@ import { interfaces } from 'inversify-express-utils';
 import * as jwt from 'jsonwebtoken';
 
 import { User } from '../../domain/user/user';
-import { AuthStrategy } from './enums';
 import { IEnvironment } from '../../environments/env.interface';
 import { IUserService } from '../../service/user/user.service.interface';
+import { AuthStrategy } from './enums';
 import { JwtPrincipal } from './jwt-principal';
 import { IJwtProvider } from './jwt.provider.interface';
 import { JwtStatic } from './jwt.static';

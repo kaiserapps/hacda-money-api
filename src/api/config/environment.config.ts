@@ -1,6 +1,7 @@
+import * as path from 'path';
+
 import { IEnvironment } from '../../environments/env.interface';
 import * as CONSTS from '../../global-const';
-import * as path from 'path';
 
 export class EnvironmentConfig {
     static Configure(env: NodeJS.ProcessEnv, rootDir: string, configDir: string) {

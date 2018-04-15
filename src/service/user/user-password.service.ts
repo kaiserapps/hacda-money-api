@@ -1,11 +1,11 @@
 import { inject, injectable } from 'inversify';
 
 import { IUser } from '../../domain/user/user';
+import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { IEmail, IEmailProvider } from '../../providers/email/email.provider.interface';
+import { IEmailProvider } from '../../providers/email/email.provider.interface';
 import { IUserPasswordService } from './user-password.service.interface';
-import { IEnvironment } from '../../environments/env.interface';
 
 @injectable()
 export class UserPasswordService implements IUserPasswordService {

@@ -1,16 +1,12 @@
 import * as TypeMoq from 'typemoq';
-import * as uuid4 from 'uuid/v4';
 
-import { NullPassword, Password } from '../../domain/user/password';
 import { IUser, User } from '../../domain/user/user';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { IEmailProvider } from '../../providers/email/email.provider.interface';
 import { BasicUserService } from './basic-user.service';
-import { IUserService } from './user.service.interface';
 import { IUserPasswordService } from './user-password.service.interface';
 
 const Mock = TypeMoq.Mock;

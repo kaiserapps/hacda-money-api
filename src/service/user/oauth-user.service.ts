@@ -6,7 +6,6 @@ import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { IEmailProvider } from '../../providers/email/email.provider.interface';
 import { UserService } from './user.service';
 import { IUserService } from './user.service.interface';
 

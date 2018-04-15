@@ -1,17 +1,16 @@
 import * as auth from 'basic-auth';
 import * as express from 'express';
 import { inject } from 'inversify';
-import { controller, interfaces, httpGet, httpPost, request, requestParam, response } from 'inversify-express-utils';
+import { controller, httpGet, httpPost, interfaces, request, requestParam, response } from 'inversify-express-utils';
 
 import { IEnvironment } from '../../../environments/env.interface';
 import { TYPES } from '../../../ioc.types';
 import { AuthStrategy } from '../../../providers/auth/enums';
 import { ICryptoProvider } from '../../../providers/crypto/crypto.provider.interface';
 import { IAuthService } from '../../../service/auth/auth.service.interface';
+import { IUserPasswordService } from '../../../service/user/user-password.service.interface';
 import { UserResponse } from '../../../service/user/user-response';
 import { IUserService } from '../../../service/user/user.service.interface';
-import { BasicUserService } from '../../../service/user/basic-user.service';
-import { IUserPasswordService } from '../../../service/user/user-password.service.interface';
 
 @controller('/auth/basic')
 export class AuthBasicController implements interfaces.Controller {

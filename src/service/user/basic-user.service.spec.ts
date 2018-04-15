@@ -1,8 +1,8 @@
 import * as TypeMoq from 'typemoq';
 import * as uuid4 from 'uuid/v4';
 
-import { NullPassword, Password } from '../../domain/user/password';
-import { IUser, User } from '../../domain/user/user';
+import { NullPassword } from '../../domain/user/password';
+import { User } from '../../domain/user/user';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
 import { AuthStrategy } from '../../providers/auth/enums';

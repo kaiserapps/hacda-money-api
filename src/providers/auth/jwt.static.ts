@@ -1,16 +1,12 @@
 import * as fs from 'fs';
-import { interfaces } from 'inversify-express-utils';
 import * as jwt from 'jsonwebtoken';
 
-import { User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
 import { IUserService } from '../../service/user/user.service.interface';
 import { BasicJwtProvider } from './basic-jwt.provider';
 import { AuthStrategy } from './enums';
-import { JwtPrincipal } from './jwt-principal';
 import { IJwtProvider } from './jwt.provider.interface';
 import { OAuthJwtProvider } from './oauth-jwt.provider';
-import { UnauthenticatedPrincipal } from './unauthenticated-principal';
 
 export class JwtStatic {
     static async getJwtProviderByToken(token: string, environment: IEnvironment, userService: IUserService): Promise<IJwtProvider | null> {

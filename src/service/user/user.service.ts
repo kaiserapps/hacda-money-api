@@ -1,6 +1,6 @@
 import { injectable, unmanaged } from 'inversify';
 
-import { IUser, User } from '../../domain/user/user';
+import { IUser } from '../../domain/user/user';
 import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
 import { AuthStrategy } from '../../providers/auth/enums';
