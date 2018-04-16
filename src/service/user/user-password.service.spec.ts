@@ -16,7 +16,7 @@ const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;
 const Times = TypeMoq.Times;
 
-describe('user service', () => {
+describe('user password service', () => {
     let env: TypeMoq.IMock<IEnvironment>;
     let dateProv: TypeMoq.IMock<IDateProvider>;
     let emailProv: TypeMoq.IMock<IEmailProvider>;

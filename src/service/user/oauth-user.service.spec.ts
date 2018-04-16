@@ -14,7 +14,7 @@ const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;
 const Times = TypeMoq.Times;
 
-describe('user service', () => {
+describe('oauth user service', () => {
     let env: TypeMoq.IMock<IEnvironment>;
     let userRepo: TypeMoq.IMock<IUserRepository>;
     let cryptoProv: TypeMoq.IMock<ICryptoProvider>;
