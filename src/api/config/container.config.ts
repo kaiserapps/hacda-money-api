@@ -11,6 +11,8 @@ import { IUserRepository } from '../../domain/user/user.repository.interface';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
+import { JwtProvider } from '../../providers/auth/jwt.provider';
+import { IJwtProvider } from '../../providers/auth/jwt.provider.interface';
 import { CryptoProvider } from '../../providers/crypto/crypto.provider';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
@@ -68,6 +70,7 @@ export class ContainerConfig {
         else {
             container.bind<IEmailProvider>(TYPES.EmailProvider).to(SendGridEmailProvider).inSingletonScope();
         }
+        container.bind<IJwtProvider>(TYPES.JwtProvider).to(JwtProvider).inSingletonScope();
         container.bind<IUserProvider>(TYPES.UserProvider).to(UserProvider).inSingletonScope();
         // repositories
         if (settings.useInMemoryDb) {

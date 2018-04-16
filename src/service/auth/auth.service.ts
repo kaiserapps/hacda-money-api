@@ -4,46 +4,46 @@ import { IUser, User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
 import { TYPES } from '../../ioc.types';
 import { JwtPrincipal } from '../../providers/auth/jwt-principal';
-import { JwtStatic } from '../../providers/auth/jwt.static';
 import { IUserProvider } from '../../providers/user/user.provider.interface';
 import { IUserService } from '../user/user.service.interface';
 import { IAuthService } from './auth.service.interface';
+import { IJwtProvider } from '../../providers/auth/jwt.provider.interface';
+import { UnauthenticatedPrincipal } from '../../providers/auth/unauthenticated-principal';
 
 @injectable()
 export class AuthService implements IAuthService {
     constructor(
         @inject(TYPES.Environment) private environment: IEnvironment,
         @inject(TYPES.UserService) private userService: IUserService,
-        @inject(TYPES.UserProvider) private userProvider: IUserProvider
+        @inject(TYPES.UserProvider) private userProvider: IUserProvider,
+        @inject(TYPES.JwtProvider) private jwtProvider: IJwtProvider
     ) { }
 
     async checkToken(token: string): Promise<IUser> {
         if (!token) {
-            return Promise.reject(`Token is required.`);
+            throw new Error(`Token is required.`);
         }
-        const provider = await JwtStatic.getJwtProviderByToken(token, this.environment, this.userService);
-        if (!provider) {
-            throw new Error(`Provider for bearer token not found.`);
+
+        const principal = await this.jwtProvider.validateToken(token);
+        if (principal instanceof UnauthenticatedPrincipal) {
+            throw new Error(principal.details);
         }
-        const principal = await provider.validateToken(token);
-        const typedPrincipal = principal as JwtPrincipal;
-        const user = await this.userService.findUser(typedPrincipal.details.strategy, typedPrincipal.details.email);
+        else if (!principal) {
+            throw new Error(`Token validation failed.`);
+        }
+
+        this.userProvider.validate(principal as JwtPrincipal);
+        const user = await this.userService.findUser(this.userProvider.user.details.strategy, this.userProvider.user.details.email);
         if (user && user.tokens && user.tokens.indexOf(token) > -1) {
-            this.userProvider.user = typedPrincipal;
-            return typedPrincipal.details;
+            return this.userProvider.user.details;
         }
         else {
+            this.userProvider.invalidate();
             throw new Error(`Authorization token is invalid.`);
         }
     }
 
     async login(user: User): Promise<string> {
-        const provider = await JwtStatic.getJwtProvider(user.strategy, this.environment, this.userService);
-        if (provider) {
-            return provider.generateToken(user);
-        }
-        else {
-            throw new Error(`JWT Provider not found for strategy ${user.strategy}!`);
-        }
+        return this.jwtProvider.generateToken(user);
     }
 }

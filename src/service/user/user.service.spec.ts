@@ -8,6 +8,7 @@ import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interfac
 import { IDateProvider } from '../../providers/date/date.provider.interface';
 import { BasicUserService } from './basic-user.service';
 import { IUserPasswordService } from './user-password.service.interface';
+import { MockHelper } from '../../testing/mock-helper';
 
 const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;
@@ -59,7 +60,7 @@ describe('user service', () => {
             // Arrange
             const userService = new BasicUserService(env.object, userRepo.object, cryptoProv.object, dateProv.object, passSvc.object);
             const mockUser = Mock.ofType<IUser>();
-            mockUser.setup((x: any) => x.then).returns(() => undefined);
+            MockHelper.makeResolvable(mockUser);
             mockUser.setup(x => x.addSession(It.isAnyString())).verifiable();
             userRepo.setup(x => x.getUser(It.isAnyNumber(), It.isAnyString())).returns(() => Promise.resolve(mockUser.object)).verifiable();
             userRepo.setup(x => x.saveUser(It.isAnyObject<User>(User))).returns(() => Promise.resolve()).verifiable();

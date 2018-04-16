@@ -8,21 +8,20 @@ import { IUserService } from '../../service/user/user.service.interface';
 import { AuthStrategy } from './enums';
 import { JwtPrincipal } from './jwt-principal';
 import { IJwtProvider } from './jwt.provider.interface';
-import { JwtStatic } from './jwt.static';
 import { UnauthenticatedPrincipal } from './unauthenticated-principal';
 
-export abstract class JwtProvider implements IJwtProvider {
+export class JwtProvider implements IJwtProvider {
     jwt: any;
     constructor(
-        protected userService: IUserService,
-        protected environment: IEnvironment
+        private userService: IUserService,
+        private environment: IEnvironment
     ) {
         this.jwt = environment.jwt;
     }
 
     async validateToken(token: string): Promise<interfaces.Principal> {
         try {
-            const decoded = await JwtStatic.verifyToken(this.jwt, token);
+            const decoded = await this.verifyToken(this.jwt, token);
             return new JwtPrincipal(decoded);
         }
         catch (err) {
@@ -53,19 +52,37 @@ export abstract class JwtProvider implements IJwtProvider {
             subject: user.email,
         }
 
-        // Set up the async signing function
-        const signJwt = async (payload: any, secret: jwt.Secret, options: jwt.SignOptions) => {
-            return new Promise<string>((resolve, reject) => {
-                const that = this;
-                jwt.sign(payload, cert, opts, (err, token) => {
-                    err ? reject(err) : resolve(token);
-                });
-            });
-        };
-
         // Generate the JWT and add it to the user's session
-        const tkn = await signJwt(data, cert, opts);
+        const tkn = await this.signToken(data, cert, opts);
         await this.userService.addSession(user.strategy, user.email, tkn);
         return tkn;
+    }
+
+    private async signToken(payload: any, secret: jwt.Secret, options: jwt.SignOptions): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            const that = this;
+            jwt.sign(payload, secret, options, (err, token) => {
+                err ? reject(err) : resolve(token);
+            });
+        });
+    }
+    
+    private async verifyToken(jwtSettings: any, token: string): Promise<any> {
+        const cert = fs.readFileSync(jwtSettings.publicKeyPath || '');
+
+        return new Promise<any>((resolve, reject) => {
+            jwt.verify(token, cert, {
+                algorithms: ['RS256'],
+                audience: jwtSettings.audience,
+                issuer: jwtSettings.issuer
+            }, (err, decoded) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(decoded);
+                }
+            });
+        });
     }
 }
