@@ -66,7 +66,7 @@ export class JwtProvider implements IJwtProvider {
             });
         });
     }
-    
+
     private async verifyToken(jwtSettings: any, token: string): Promise<any> {
         const cert = fs.readFileSync(jwtSettings.publicKeyPath || '');
 

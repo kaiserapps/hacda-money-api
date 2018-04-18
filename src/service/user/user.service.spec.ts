@@ -6,33 +6,25 @@ import { IEnvironment } from '../../environments/env.interface';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
+import { MockHelper } from '../../testing/mock-helper';
 import { BasicUserService } from './basic-user.service';
 import { IUserPasswordService } from './user-password.service.interface';
-import { MockHelper } from '../../testing/mock-helper';
 
 const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;
 const Times = TypeMoq.Times;
 
 describe('user service', () => {
-    let env: TypeMoq.IMock<IEnvironment>;
-    let userRepo: TypeMoq.IMock<IUserRepository>;
-    let cryptoProv: TypeMoq.IMock<ICryptoProvider>;
-    let dateProv: TypeMoq.IMock<IDateProvider>;
-    let passSvc: TypeMoq.IMock<IUserPasswordService>;
-
-    beforeAll(() => {
-        env = Mock.ofType<IEnvironment>();
-        userRepo = Mock.ofType<IUserRepository>();
-        cryptoProv = Mock.ofType<ICryptoProvider>();
-        dateProv = Mock.ofType<IDateProvider>();
-        passSvc = Mock.ofType<IUserPasswordService>();
-    });
 
     describe('register user', () => {
 
         it('does not create user if registration failed', async done => {
             // Arrange
+            const env = Mock.ofType<IEnvironment>();
+            const userRepo = Mock.ofType<IUserRepository>();
+            const cryptoProv = Mock.ofType<ICryptoProvider>();
+            const dateProv = Mock.ofType<IDateProvider>();
+            const passSvc = Mock.ofType<IUserPasswordService>();
             const userService = new BasicUserService(env.object, userRepo.object, cryptoProv.object, dateProv.object, passSvc.object);
             const anyUser = It.isAnyObject<User>(User);
             const expectedError = 'initUserError';
@@ -58,6 +50,11 @@ describe('user service', () => {
 
         it('pushes a new token on successful retrieve of user', async done => {
             // Arrange
+            const env = Mock.ofType<IEnvironment>();
+            const userRepo = Mock.ofType<IUserRepository>();
+            const cryptoProv = Mock.ofType<ICryptoProvider>();
+            const dateProv = Mock.ofType<IDateProvider>();
+            const passSvc = Mock.ofType<IUserPasswordService>();
             const userService = new BasicUserService(env.object, userRepo.object, cryptoProv.object, dateProv.object, passSvc.object);
             const mockUser = Mock.ofType<IUser>();
             MockHelper.makeResolvable(mockUser);

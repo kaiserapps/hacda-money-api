@@ -17,20 +17,14 @@ const It = TypeMoq.It;
 const Times = TypeMoq.Times;
 
 describe('user password service', () => {
-    let env: TypeMoq.IMock<IEnvironment>;
-    let dateProv: TypeMoq.IMock<IDateProvider>;
-    let emailProv: TypeMoq.IMock<IEmailProvider>;
-
-    beforeAll(() => {
-        env = Mock.ofType<IEnvironment>();
-        dateProv = Mock.ofType<IDateProvider>();
-        emailProv = Mock.ofType<IEmailProvider>();
-    });
 
     describe('reset password', () => {
 
         theoretically.it('sends email to activate account', [true, false], async (doActivate: boolean, done) => {
             // Arrange
+            const env = Mock.ofType<IEnvironment>();
+            const dateProv = Mock.ofType<IDateProvider>();
+            const emailProv = Mock.ofType<IEmailProvider>();
             const passService = new UserPasswordService(env.object, dateProv.object, emailProv.object);
             const mockUser = Mock.ofType<IUser>();
             const token = 'testresettoken';
@@ -57,6 +51,9 @@ describe('user password service', () => {
 
         it('sends email with reset token', async done => {
             // Arrange
+            const env = Mock.ofType<IEnvironment>();
+            const dateProv = Mock.ofType<IDateProvider>();
+            const emailProv = Mock.ofType<IEmailProvider>();
             const emailSpy = jasmine.createSpyObj<IEmailProvider>('IEmailProvider', ['sendEmail']);
             const passService = new UserPasswordService(env.object, dateProv.object, emailSpy);
             const mockUser = Mock.ofType<IUser>();

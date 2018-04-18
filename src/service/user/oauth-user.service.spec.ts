@@ -15,22 +15,15 @@ const It = TypeMoq.It;
 const Times = TypeMoq.Times;
 
 describe('oauth user service', () => {
-    let env: TypeMoq.IMock<IEnvironment>;
-    let userRepo: TypeMoq.IMock<IUserRepository>;
-    let cryptoProv: TypeMoq.IMock<ICryptoProvider>;
-    let dateProv: TypeMoq.IMock<IDateProvider>;
-
-    beforeAll(() => {
-        env = Mock.ofType<IEnvironment>();
-        userRepo = Mock.ofType<IUserRepository>();
-        cryptoProv = Mock.ofType<ICryptoProvider>();
-        dateProv = Mock.ofType<IDateProvider>();
-    });
 
     describe('register oauth', () => {
 
         it('creates user on repository', async done => {
             // Arrange
+            const env = Mock.ofType<IEnvironment>();
+            const userRepo = Mock.ofType<IUserRepository>();
+            const cryptoProv = Mock.ofType<ICryptoProvider>();
+            const dateProv = Mock.ofType<IDateProvider>();
             const userService = new OAuthUserService(env.object, userRepo.object, cryptoProv.object, dateProv.object);
             const user = User.Fixture({
                 id: uuid4(),
