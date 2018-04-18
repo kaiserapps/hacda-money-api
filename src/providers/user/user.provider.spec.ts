@@ -1,6 +1,7 @@
 import * as TypeMoq from 'typemoq';
-import { UserProvider } from './user.provider';
+
 import { JwtPrincipal } from '../auth/jwt-principal';
+import { UserProvider } from './user.provider';
 
 const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;

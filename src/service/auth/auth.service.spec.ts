@@ -2,17 +2,17 @@ import { interfaces } from 'inversify-express-utils';
 import * as TypeMoq from 'typemoq';
 import * as uuid4 from 'uuid/v4';
 
+import { NullPassword } from '../../domain/user/password';
+import { User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
+import { AuthStrategy } from '../../providers/auth/enums';
+import { JwtPrincipal } from '../../providers/auth/jwt-principal';
 import { IJwtProvider } from '../../providers/auth/jwt.provider.interface';
+import { UnauthenticatedPrincipal } from '../../providers/auth/unauthenticated-principal';
 import { IUserProvider } from '../../providers/user/user.provider.interface';
 import { MockHelper } from '../../testing/mock-helper';
 import { IUserService } from '../user/user.service.interface';
 import { AuthService } from './auth.service';
-import { IUser, User } from '../../domain/user/user';
-import { AuthStrategy } from '../../providers/auth/enums';
-import { NullPassword } from '../../domain/user/password';
-import { JwtPrincipal } from '../../providers/auth/jwt-principal';
-import { UnauthenticatedPrincipal } from '../../providers/auth/unauthenticated-principal';
 
 const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;

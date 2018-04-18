@@ -1,16 +1,11 @@
-import * as TypeMoq from 'typemoq';
 import theoretically from 'jasmine-theories';
+import * as TypeMoq from 'typemoq';
 
-import { IUser, User } from '../../domain/user/user';
-import { IUserRepository } from '../../domain/user/user.repository.interface';
+import { IUser } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
-import { AuthStrategy } from '../../providers/auth/enums';
-import { ICryptoProvider } from '../../providers/crypto/crypto.provider.interface';
 import { IDateProvider } from '../../providers/date/date.provider.interface';
-import { BasicUserService } from './basic-user.service';
-import { IUserPasswordService } from './user-password.service.interface';
-import { UserPasswordService } from './user-password.service';
 import { IEmailProvider } from '../../providers/email/email.provider.interface';
+import { UserPasswordService } from './user-password.service';
 
 const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;
