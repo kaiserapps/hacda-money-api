@@ -1,20 +1,23 @@
 import * as fs from 'fs';
+import { inject, injectable } from 'inversify';
 import { interfaces } from 'inversify-express-utils';
 import * as jwt from 'jsonwebtoken';
 
 import { User } from '../../domain/user/user';
 import { IEnvironment } from '../../environments/env.interface';
+import { TYPES } from '../../ioc.types';
 import { IUserService } from '../../service/user/user.service.interface';
 import { AuthStrategy } from './enums';
 import { JwtPrincipal } from './jwt-principal';
 import { IJwtProvider } from './jwt.provider.interface';
 import { UnauthenticatedPrincipal } from './unauthenticated-principal';
 
+@injectable()
 export class JwtProvider implements IJwtProvider {
     jwt: any;
     constructor(
-        private userService: IUserService,
-        private environment: IEnvironment
+        @inject(TYPES.Environment) private environment: IEnvironment,
+        @inject(TYPES.UserService) private userService: IUserService
     ) {
         this.jwt = environment.jwt;
     }
