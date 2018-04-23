@@ -1,5 +1,6 @@
 import * as TypeMoq from 'typemoq';
-import * as moment from 'moment';
+
+import { MomentDateProvider } from './moment-date.provider';
 
 const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;
@@ -7,7 +8,14 @@ const Times = TypeMoq.Times;
 
 describe('moment date provider', () => {
 
-    describe('currentDateTicks', () => {
-        
+    it('gets current system date', done => {
+        const clock = jasmine.clock();
+        const testDate = new Date(2018, 0, 1, 0, 0, 0, 0);
+        clock.mockDate(testDate);
+        clock.withMock(() => {
+            const dateProv = new MomentDateProvider();
+            expect(dateProv.currentDateTicks).toBe(testDate.getTime());
+            done();
+        });
     });
 });
