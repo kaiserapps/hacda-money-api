@@ -8,10 +8,10 @@ import { ICryptoProvider, IPasswordData } from './crypto.provider.interface';
 @injectable()
 export class CryptoProvider implements ICryptoProvider {
     constructor(
-        @inject(TYPES.Environment) public environment: IEnvironment
+        @inject(TYPES.Environment) private environment: IEnvironment
     ) { }
 
-    public hashPassword(password: string, algorithm: string = 'sha512'): IPasswordData {
+    hashPassword(password: string, algorithm: string = 'sha512'): IPasswordData {
         const salt = this.genRandomString(8);
         const hash = crypto.createHmac(algorithm, salt);
         hash.update(password);
@@ -21,20 +21,20 @@ export class CryptoProvider implements ICryptoProvider {
         };
     }
 
-    public verifyPassword(password: string, hashInfo: IPasswordData, algorithm: string = 'sha512'): boolean {
+    verifyPassword(password: string, hashInfo: IPasswordData, algorithm: string = 'sha512'): boolean {
         const hash = crypto.createHmac(algorithm, hashInfo.salt);
         hash.update(password);
         return hash.digest('hex') === hashInfo.hash;
     }
 
-    public encrypt(plaintext: string, algorithm: string = 'des3'): string {
+    encrypt(plaintext: string, algorithm: string = 'des3'): string {
         const cipher = crypto.createCipher(algorithm, this.environment.encryptionKey);
         let encrypted = cipher.update(plaintext, 'utf8', 'base64');
         encrypted += cipher.final('base64');
         return encrypted;
     }
 
-    public decrypt(encrypted: string, algorithm: string = 'des3'): string {
+    decrypt(encrypted: string, algorithm: string = 'des3'): string {
         const decipher = crypto.createDecipher(algorithm, this.environment.encryptionKey);
         let plaintext = decipher.update(encrypted, 'base64', 'utf8');
         plaintext += decipher.final('utf8');

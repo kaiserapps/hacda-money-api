@@ -176,4 +176,20 @@ describe('crypto provider', () => {
             expect(matched).toBeFalsy();
         });
     });
+
+    describe('encrypt string', () => {
+
+        it('creates cipher', () => {
+            // Arrange
+            const cipherMock = Mock.ofType<crypto.Cipher>();
+            const cipherSpy = spyOn(crypto, 'createCipher').and.returnValue(cipherMock.object);
+
+            // Act
+            const cryptoProv = new CryptoProvider(Mock.ofType<IEnvironment>().object);
+            cryptoProv.encrypt('plaintext');
+
+            // Assert
+            expect(cipherSpy).toHaveBeenCalled();
+        });
+    });
 });
