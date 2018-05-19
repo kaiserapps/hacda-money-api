@@ -1,7 +1,6 @@
 import * as SendGrid from '@sendgrid/mail';
 import * as TypeMoq from 'typemoq';
 
-import { JwtPrincipal } from '../auth/jwt-principal';
 import { IEnvironment } from '../../environments/env.interface';
 import { SendGridEmailProvider } from './sendgrid-email.provider';
 

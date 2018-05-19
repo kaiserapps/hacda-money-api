@@ -1,7 +1,8 @@
 import * as crypto from 'crypto';
 import * as TypeMoq from 'typemoq';
-import { CryptoProvider } from './crypto.provider';
+
 import { IEnvironment } from '../../environments/env.interface';
+import { CryptoProvider } from './crypto.provider';
 
 const Mock = TypeMoq.Mock;
 const It = TypeMoq.It;
@@ -190,6 +191,56 @@ describe('crypto provider', () => {
 
             // Assert
             expect(cipherSpy).toHaveBeenCalled();
+        });
+
+        it('updates plaintext using cipher', () => {
+            // Arrange
+            const cipherMock = Mock.ofType<crypto.Cipher>();
+            cipherMock.setup(x => x.update(It.isAnyString(), 'utf8', 'base64')).returns(() => 'encrypted').verifiable();
+            cipherMock.setup(x => x.final('base64')).returns(() => ' value').verifiable();
+            const cipherSpy = spyOn(crypto, 'createCipher').and.returnValue(cipherMock.object);
+
+            // Act
+            const cryptoProv = new CryptoProvider(Mock.ofType<IEnvironment>().object);
+            const result = cryptoProv.encrypt('plaintext');
+
+            // Assert
+            cipherMock.verify(x => x.update('plaintext', 'utf8', 'base64'), Times.once());
+            cipherMock.verify(x => x.final('base64'), Times.once());
+            expect(result).toBe('encrypted value');
+        });
+    });
+
+    describe('decrypt string', () => {
+
+        it('creates decipher', () => {
+            // Arrange
+            const cipherMock = Mock.ofType<crypto.Decipher>();
+            const cipherSpy = spyOn(crypto, 'createDecipher').and.returnValue(cipherMock.object);
+
+            // Act
+            const cryptoProv = new CryptoProvider(Mock.ofType<IEnvironment>().object);
+            cryptoProv.decrypt('encrypted value');
+
+            // Assert
+            expect(cipherSpy).toHaveBeenCalled();
+        });
+
+        it('updates encrypted value using decipher', () => {
+            // Arrange
+            const decipherMock = Mock.ofType<crypto.Decipher>();
+            decipherMock.setup(x => x.update(It.isAnyString(), 'base64', 'utf8')).returns(() => 'plain').verifiable();
+            decipherMock.setup(x => x.final('utf8')).returns(() => 'text').verifiable();
+            const cipherSpy = spyOn(crypto, 'createDecipher').and.returnValue(decipherMock.object);
+
+            // Act
+            const cryptoProv = new CryptoProvider(Mock.ofType<IEnvironment>().object);
+            const result = cryptoProv.decrypt('encrypted value');
+
+            // Assert
+            decipherMock.verify(x => x.update('encrypted value', 'base64', 'utf8'), Times.once());
+            decipherMock.verify(x => x.final('utf8'), Times.once());
+            expect(result).toBe('plaintext');
         });
     });
 });
