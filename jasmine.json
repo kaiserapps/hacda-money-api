@@ -1,0 +1,11 @@
+{
+  "spec_dir": "./dist",
+  "spec_files": [
+    "**/*.spec.js"
+  ],
+  "helpers": [
+    "polyfills.js"
+  ],
+  "stopSpecOnExpectationFailure": false,
+  "random": true
+}

@@ -1,4 +1,4 @@
-describe('karma', () => {
+describe('jasmine', () => {
     it('works', () => {
         expect(true).toBeTruthy();
     });

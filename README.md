@@ -1,19 +1,19 @@
 # hacda-money-api
 A money management API for the Harrisburg Area Contra Dance
 
-# Install
+## Install
 
 ```
 npm i
 ```
 
-# Run
+## Run
 
 ```
 npm start
 ```
 
-# Test
+## Test
 
 ```
 npm test
