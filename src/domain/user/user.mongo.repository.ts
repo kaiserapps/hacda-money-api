@@ -6,7 +6,7 @@ import { TYPES } from '../../ioc.types';
 import { AuthStrategy } from '../../providers/auth/enums';
 import { Audit } from '../audit/audit';
 import { IAuditRepository } from '../audit/audit.repository.interface';
-import { AuditClasses, AuditType } from '../audit/enums';
+import { AuditType } from '../audit/enums';
 import { User } from './user';
 import { UserRepository } from './user.repository';
 import { IUserRepository } from './user.repository.interface';
@@ -39,7 +39,7 @@ export class UserMongoRepository extends UserRepository implements IUserReposito
     }
 
     async createUser(user: User): Promise<void> {
-        this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Create, user));
+        this.auditRepository.createAudit(new Audit(User.name, AuditType.Create, user));
         return new Promise<void>((resolve: any, reject: any) => {
             const newUser = new this.UserModel(user);
             newUser.save((err: any) => {
@@ -54,7 +54,7 @@ export class UserMongoRepository extends UserRepository implements IUserReposito
     }
 
     async saveUser(user: User): Promise<void> {
-        this.auditRepository.createAudit(new Audit(AuditClasses.user, AuditType.Update, user));
+        this.auditRepository.createAudit(new Audit(User.name, AuditType.Update, user));
         return new Promise<void>((resolve: any, reject: any) => {
             this.UserModel.findByIdAndUpdate(user._id, user, (err: any) => {
                 if (err) {

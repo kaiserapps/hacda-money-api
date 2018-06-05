@@ -4,7 +4,3 @@ export enum AuditType {
     Update = 2,
     Delete = 3
 }
-
-export class AuditClasses {
-    static user = 'User';
-}
