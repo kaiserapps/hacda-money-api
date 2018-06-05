@@ -40,18 +40,18 @@ export class UserMemoryRepository extends UserRepository implements IUserReposit
     }
 
     async createUser(user: User): Promise<void> {
-        user._id = uuid4();
-        this.auditRepository.createAudit(new Audit(User.name, AuditType.Create, user));
+        user = User.Fixture(user, uuid4());
+        this.auditRepository.createAudit(User.name, AuditType.Create, user);
         this.database.users.push(user);
         return Promise.resolve();
     }
 
     async saveUser(user: User): Promise<void> {
-        const idx = this.database.users.findIndex(x => x._id === user._id);
+        const idx = this.database.users.findIndex(x => x.id === user.id);
         if (idx < 0) {
             return Promise.reject(`User with email address ${user.email} not found!`);
         }
-        this.auditRepository.createAudit(new Audit(User.name, AuditType.Update, user));
+        this.auditRepository.createAudit(User.name, AuditType.Update, user);
         this.database.users[idx] = user;
         return Promise.resolve();
     }

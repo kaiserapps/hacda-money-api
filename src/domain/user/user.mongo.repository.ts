@@ -27,19 +27,19 @@ export class UserMongoRepository extends UserRepository implements IUserReposito
             this.UserModel.find({
                 strategy: strategy,
                 email: email
-            }, (err: any, users: any) => {
+            }, (err: any, res: any) => {
                 if (err) {
                     reject(err);
                 }
                 else {
-                    resolve(users.length ? users[0] : null);
+                    resolve(res.length ? res[0] : null);
                 }
             });
         });
     }
 
     async createUser(user: User): Promise<void> {
-        this.auditRepository.createAudit(new Audit(User.name, AuditType.Create, user));
+        this.auditRepository.createAudit(User.name, AuditType.Create, user);
         return new Promise<void>((resolve: any, reject: any) => {
             const newUser = new this.UserModel(user);
             newUser.save((err: any) => {
@@ -54,9 +54,9 @@ export class UserMongoRepository extends UserRepository implements IUserReposito
     }
 
     async saveUser(user: User): Promise<void> {
-        this.auditRepository.createAudit(new Audit(User.name, AuditType.Update, user));
+        this.auditRepository.createAudit(User.name, AuditType.Update, user);
         return new Promise<void>((resolve: any, reject: any) => {
-            this.UserModel.findByIdAndUpdate(user._id, user, (err: any) => {
+            this.UserModel.findByIdAndUpdate(user.id, user, (err: any) => {
                 if (err) {
                     reject(err);
                 }

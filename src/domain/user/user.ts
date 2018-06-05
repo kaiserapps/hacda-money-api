@@ -31,7 +31,7 @@ export interface IUser extends IUserData {
 }
 
 export class User implements IUser {
-    _id: string;
+    private _id: string;
     private _strategy: AuthStrategy;
     private _email: string;
     private _displayName: string;
@@ -138,9 +138,9 @@ export class User implements IUser {
         this.tokens.push(token);
     }
 
-    static Fixture(data: IUserData): User {
+    static Fixture(data: IUserData, id?: string): User {
         const u = new User();
-        u._id = data.id;
+        u._id = id || data.id;
         u._strategy = data.strategy;
         u._email = data.email;
         u._displayName = data.displayName;
